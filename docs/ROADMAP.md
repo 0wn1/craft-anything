@@ -1236,6 +1236,8 @@ Owner: open · Status: in progress
       exchanges, and report malformed records as incomplete instead of inventing answer values,
       while preserving legal empty DNS UPDATE RRset prerequisites
       — claimed: Afloat16, branch bugfix/r3.12-dns-rdata-names-review-20261104
+- [x] Keep address and service records attached to their owner and validate the record's wire fields.
+      — claimed: Afloat16, branch bugfix/r3.12-dns-record-evidence
 
 ### R3.13 Web inspection correctness
 Owner: open · Status: in progress
