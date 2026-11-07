@@ -1154,6 +1154,8 @@ Owner: open · Status: in progress
 - [x] Reject incomplete simple packet block payloads.
       — claimed: Afloat16, branch bugfix/r3.12-pcapng-simple-block-length-20261105
       Count rejected lengths against the packet scan limit and summarize them once at the end of the walk.
+- [x] Bound rejected packet records, validate timestamp fractions and check pcapng section-local interfaces.
+      — claimed: Afloat16, branch bugfix/r3.12-capture-timing-framing
 - [x] Keep ZIP directory entries within the declared directory.
       — claimed: Afloat16, branch bugfix/r3.12-zip-directory-bounds-20261105
 - [x] Refuse split ZIP archives without their other volumes.
