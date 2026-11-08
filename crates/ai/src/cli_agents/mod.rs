@@ -2731,6 +2731,71 @@ echo '{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}'
         assert!(acp_for(&spec).is_some());
     }
 
+    /// A remote host runs whichever craft-anything-cli it has, of any release. Every release, from
+    /// 0.1.0 on, knows the global `--deep` and `--clean-room` and applies them in `mcp`, and has
+    /// `mcp --all-tools`, so a remote tool server gets only those (adapters add nothing else, Codex
+    /// only `--all-tools`). A flag outside them needs the remote CLI checked first, or an older one
+    /// stops the build at its first tool. Of our own variables the remote side gets only
+    /// `CRAFT_ANYTHING_AGENT`, which no release up to 0.5.0 reads (R2.8 keeps that open).
+    #[test]
+    fn a_remote_tool_server_gets_only_flags_every_release_knows() {
+        use craft_anything_engine::{TargetKind, target::TargetContext};
+        for deep in [false, true] {
+            for builder in [false, true] {
+                let config = BackendConfig {
+                    name: "Remote".into(),
+                    kind: BackendKind::AgentCli,
+                    model: "claude-code".into(),
+                    base_url: None,
+                    ssh_host: Some("build-box".into()),
+                    enabled: true,
+                };
+                let mut spec = CliSpec::new(config, BackendOptions::default(), false, Some(PathBuf::from("/p/investigation")));
+                spec.deep = deep;
+                spec.builder = builder.then(|| Builder { investigation: Some(PathBuf::from("/p/investigation")), inbox: PathBuf::from("/p/inbox") });
+                spec.targets = vec![TargetContext { path: PathBuf::from("/p/original.bin"), sha256: "0".repeat(64), kind: TargetKind::Elf, raw: None }];
+                let mcp = mcp_for(&spec, true);
+                assert_eq!(mcp.command, "craft-anything-cli", "the remote PATH's");
+                assert!(mcp.args.iter().all(|a| ["mcp", "--deep", "--clean-room", "--all-tools"].contains(&a.as_str())), "{deep} {builder}: {:?}", mcp.args);
+                assert!(mcp.args.contains(&if deep { "--deep" } else { "--clean-room" }.to_string()), "the run's mode, whatever the remote settings say");
+            }
+        }
+        for builder in [false, true] {
+            let ours: Vec<&str> = agent_env(builder, None).iter().map(|(name, _)| *name).filter(|name| name.starts_with("CRAFT_")).collect();
+            assert_eq!(ours, [craft_anything_engine::AGENT_ENV]);
+        }
+    }
+
+    /// A host without the helper is told apart from a failed connection: the fix is to install it
+    /// or put it on the PATH ssh sessions use.
+    #[cfg(unix)]
+    #[test]
+    fn a_host_without_the_helper_is_told_to_install_it() {
+        let empty = tempfile::tempdir().unwrap();
+        let out = craft_anything_platform::Process::new("/bin/sh")
+            .args(["-c", adapters::REMOTE_CHECK_LINE])
+            .env_clear()
+            .env("PATH", empty.path())
+            .timeout(std::time::Duration::from_secs(5))
+            .run()
+            .unwrap();
+        assert_eq!(out.code, Some(127));
+        let err = adapters::remote_failure("build-box", &out);
+        assert!(err.message.contains("craft-anything-cli wasn't found on build-box"), "{}", err.message);
+        assert!(err.remediation.unwrap_or_default().contains("PATH"));
+    }
+
+    /// Claude Code and Codex hand a remote host's own craft-anything-cli the tool server, so a build
+    /// over SSH asks the host for it first, as one here checks this computer's.
+    #[cfg(unix)]
+    #[test]
+    fn a_remote_builder_checks_the_hosts_tool_server_first() {
+        for agent in ["claude-code", "codex"] {
+            let err = adapter_for(agent).check_remote_tool_server("no-such-host.invalid", &CancelToken::default()).expect_err(agent);
+            assert_eq!(err.code, ErrorCode::EngineMissing, "{agent}: {}", err.message);
+        }
+    }
+
     #[test]
     fn mcp_target_handoff_is_bounded_and_keeps_the_active_target_last() {
         use craft_anything_engine::{TargetKind, target::TargetContext};
