@@ -917,10 +917,13 @@ Owner: open · Status: in progress
       working directory, preserving virtualenv paths for relative project placements — PR #950
 - [x] Launch a Go project with one `cmd/<name>/main.go` as a package when the root has no
       `main.go` — claimed: Afloat16, branch feature/r2.7-go-command-layouts
-- [ ] Extend launch recipes to Python package scripts and Java build outputs; build checks already
-      use their toolchain commands
+- [x] Launch the single installed console script of a Python project from its virtual environment
+      — claimed: Afloat16, branch feature/r2.7-python-console-entrypoint
+- [ ] Extend launch recipes to Java build outputs; build checks already use their toolchain commands
 - [ ] Audit relative project placements in build, option-run and Play paths too: runtime window
       capture now normalizes its request paths, but earlier runner paths can still be relative
+- [x] Resolve Godot's project argument and the local Electron binary and project argument before
+      starting either runner from a relative project folder — claimed: Afloat16, branch bugfix/r2.7-project-launch-paths
 - [x] "player" alone doesn't make a request a game: a video or music player is an app (#953)
       — claimed: justinjohn0306, branch bugfix/953-player-not-a-game
 - [x] System-tool and media-player phrases keep the app target: "a low level disk tool",
@@ -1198,6 +1201,10 @@ Owner: open · Status: in progress
 
 ### R3.12 Format parser correctness
 Owner: open · Status: in progress
+- [x] Bound rejected ASAR names by the archive listing limit.
+      — claimed: Afloat16, branch bugfix/r3.12-asar-limit-bounds-20261107
+- [x] Keep .NET bundle member reads before the manifest.
+      — claimed: Afloat16, branch bugfix/r3.12-dotnet-data-bounds-20261107
 - [x] Require a complete DNS question's type and class fields before retaining it, and keep
       truncated questions out of packet inventories while reporting the incomplete message
       — claimed: Afloat16, branch bugfix/r3.12-dns-question-class-review-20261104
@@ -1205,6 +1212,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-ipv4-header-lengths-20261105
 - [x] Validate the version in IPv6 frames.
       — claimed: Afloat16, branch bugfix/r3.12-ipv6-version-20261105
+- [x] Recognize ZIP directories from DOS directory attributes and Unix file-type metadata when the entry name has no trailing slash.
+      — claimed: Afloat16, branch bugfix/r3.12-zip-directory-attributes
 - [x] Stop decoding extension headers inside noninitial IPv6 fragments.
       — claimed: Afloat16, branch bugfix/r3.12-ipv6-fragment-payload-20261105
 - [x] Enforce the expanded DNS name wire-length limit.
@@ -1261,6 +1270,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-pe-optional-header-framing-20261105
 - [x] Keep PE resource metadata within the resource directory.
       — claimed: Afloat16, branch bugfix/r3.12-pe-resource-directory-boundary-20261105
+- [x] Decode inline source-map data URLs without treating their URL fragments as payload; recognize case-insensitive scheme and base64 markers.
+      — claimed: Afloat16, branch bugfix/r3.12-source-map-data-url-fragment
 - [x] Keep Go function tables and names within their section.
       — claimed: Afloat16, branch bugfix/r3.12-go-pclntab-section-boundary-20261105
 - [x] Preserve complete Unicode characters in shortened .NET strings.
@@ -1306,6 +1317,8 @@ Owner: open · Status: in progress
 
 ### R3.13 Web inspection correctness
 Owner: open · Status: in progress
+- [x] Read HAR captures with the permitted UTF-8 byte order mark.
+      — claimed: Afloat16, branch bugfix/r3.13-har-bom-bounds-20261107
 - [x] The HTML scanner finds script preloads in `rel` token lists, decodes asset URLs once (numeric
       and named references), keeps script and title text through lookalike closing tags, and skips
       raw-text elements, markup inside attribute values and custom tag names such as
