@@ -1417,6 +1417,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-tar-octal-fields
 - [x] Recognize ZIP directories from DOS directory attributes and Unix file-type metadata when the entry name has no trailing slash.
       — claimed: Afloat16, branch bugfix/r3.12-zip-directory-attributes
+- [x] Use a verified Info-ZIP Unicode Path extra field when listing a member stored under a legacy filename.
+      — claimed: Afloat16, branch feature/r3.12-zip-unicode-path
 - [x] Stop decoding extension headers inside noninitial IPv6 fragments.
       — claimed: Afloat16, branch bugfix/r3.12-ipv6-fragment-payload-20261105
 - [x] Enforce the expanded DNS name wire-length limit.
