@@ -1595,6 +1595,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-sbpf-symbols
 - [x] Keep PE resource metadata within the resource directory.
       — claimed: Afloat16, branch bugfix/r3.12-pe-resource-directory-boundary-20261105
+- [x] Bound PE export-table work and returned aliases even when function slots are empty or one function has many names.
+      — claimed: Afloat16, branch bugfix/r3.12-pe-export-work-budget-20261109
 - [x] Keep PE version strings whose value is empty (stored with no value at all), such as
       `OleSelfRegister`, whose presence is the whole point.
       — claimed: Plastic-time, branch bugfix/r3.12-pe-empty-version-strings
