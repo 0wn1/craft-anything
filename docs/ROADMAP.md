@@ -1514,6 +1514,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-import-library-slots-20261109
 - [x] Keep Mach-O load-command facts within their command.
       — claimed: Afloat16, branch bugfix/r3.12-macho-load-command-framing-20261105
+- [x] Resolve Mach-O UNIXTHREAD entry points from a complete state record for the image CPU, including later state records.
+      — claimed: Afloat16, branch bugfix/r3.12-macho-thread-state-20261109
 - [x] Prevent Mach-O zero-fill sections from exposing unrelated file bytes during section lookup.
       — claimed: Afloat16, branch bugfix/r3.12-macho-zerofill-section-data
 - [x] Keep native address translations and reads inside both the mapped range and its file-backed bytes.
