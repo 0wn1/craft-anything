@@ -1457,6 +1457,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-unreal-fstring-terminators-20261105
 - [x] Count every compression block spanned by an IoStore chunk.
       — claimed: Afloat16, branch bugfix/r3.12-iostore-unaligned-chunk-blocks-20261105
+- [x] Reject IoStore directory rows that name a missing chunk or name instead of reporting a zero-byte file or fabricated path.
+      — claimed: Afloat16, branch bugfix/r3.12-iostore-directory-references
 - [x] Reject truncated IoStore fixed headers.
       — claimed: Afloat16, branch bugfix/r3.12-iostore-complete-header-20261105
 - [x] Reject CBOR collections that exceed the EVM metadata reader's limits and invalid text strings.
