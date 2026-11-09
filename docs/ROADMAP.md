@@ -1591,6 +1591,9 @@ Owner: open · Status: in progress
       moved to 3351. A file with 3350 is reported as a 3.5 pre-release (`is_release: false`), with
       a note that its code layout may differ. Count 3350 and 3351 as releases of 3.5.
       — claimed: Chr0mium24, branch bugfix/r3.12-pyc-3-5-release-magic
+- [x] Name the glyph weight (26) and glyph size (27) key attributes of asset catalogs, which hold
+      SF Symbol style images; they're listed as `attribute-26` and `attribute-27` today.
+      — claimed: Chr0mium24, branch bugfix/r3.12-car-glyph-attributes
 
 ### R3.13 Web inspection correctness
 Owner: open · Status: in progress
