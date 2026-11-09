@@ -1349,6 +1349,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-macho-load-command-framing-20261105
 - [x] Keep Mach-O function starts within their declared payload.
       — claimed: Afloat16, branch bugfix/r3.12-macho-function-starts-payload-boundary-20261105
+- [x] Decode binary plist markers and dictionary keys according to their stored types.
+      — claimed: Afloat16, branch bugfix/r3.12-bplist-typed-objects
 - [x] Keep code-signature children and verification reads within their declared superblob.
       — claimed: Afloat16, branch bugfix/r3.12-codesign-superblob-length-boundary-20261105
 - [x] Keep PE optional-header reads within the declared header.

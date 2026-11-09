@@ -164,7 +164,7 @@ pub fn apple_date_iso(secs: f64) -> String {
 
 /// True when the bytes look like a property list of either kind.
 pub fn looks_like_plist(data: &[u8]) -> bool {
-    data.starts_with(b"bplist00") || data.iter().take(1024).copied().collect::<Vec<u8>>().windows(6).any(|w| w == b"<plist")
+    (data.len() >= 8 && data.starts_with(b"bplist0")) || data.iter().take(1024).copied().collect::<Vec<u8>>().windows(6).any(|w| w == b"<plist")
 }
 
 /// Parse a binary or XML property list.
@@ -193,6 +193,9 @@ pub fn parse_binary(data: &[u8]) -> Result<Value, FormatError> {
 fn parse_binary_within(data: &[u8], byte_budget: usize) -> Result<Value, FormatError> {
     if !data.starts_with(b"bplist") {
         return Err(FormatError::Malformed("not a binary plist".into()));
+    }
+    if !data.starts_with(b"bplist0") {
+        return Err(FormatError::Unsupported("unknown binary plist version".into()));
     }
     let len = data.len();
     if len < 8 + 32 {
@@ -313,7 +316,7 @@ impl Bin<'_> {
                 0x0 => Value::Null,
                 0x8 => Value::Bool(false),
                 0x9 => Value::Bool(true),
-                _ => Value::Null,
+                _ => return Err(FormatError::Malformed(format!("unknown simple plist object {m:#04x}"))),
             },
             0x1 => {
                 if lo > 4 {
@@ -336,7 +339,7 @@ impl Bin<'_> {
                 };
                 Value::Real(v.ok_or_else(|| FormatError::Truncated("real".into()))?)
             }
-            0x3 => Value::Date(DateValue::Seconds(self.r.u64_be(at + 1).map(f64::from_bits).ok_or_else(|| FormatError::Truncated("date".into()))?)),
+            0x3 if lo == 3 => Value::Date(DateValue::Seconds(self.r.u64_be(at + 1).map(f64::from_bits).ok_or_else(|| FormatError::Truncated("date".into()))?)),
             0x4 => {
                 let (n, s) = self.count(at, lo)?;
                 let bytes = self.r.slice(s, n).ok_or_else(|| FormatError::Truncated("data".into()))?;
@@ -397,7 +400,7 @@ impl Bin<'_> {
                     let v = self.reference(s, i + n)?;
                     let key = match self.object(k, stack)? {
                         Value::String(s) => s,
-                        other => format!("{:?}", other.to_json()),
+                        _ => return Err(FormatError::Unsupported("non-string dictionary keys cannot be represented in this plist view".into())),
                     };
                     out.push((key, self.object(v, stack)?));
                 }
@@ -790,6 +793,24 @@ mod tests {
         b.extend_from_slice(&0u64.to_be_bytes());
         b.extend_from_slice(&(table as u64).to_be_bytes());
         b
+    }
+
+    #[test]
+    fn binary_plist_does_not_invent_types_or_dictionary_keys() {
+        let mut version = small_bplist(&[vec![0x00]]);
+        version[7] = b'1';
+        assert!(looks_like_plist(&version));
+        assert_eq!(parse_binary(&version).unwrap(), Value::Null);
+        version[6] = b'1';
+        assert!(matches!(parse_binary(&version), Err(FormatError::Unsupported(_))));
+        for marker in [0x01, 0x0f, 0x30, 0x32, 0x34] {
+            let mut object = vec![marker];
+            object.extend_from_slice(&0f64.to_be_bytes());
+            assert!(parse_binary(&small_bplist(&[object])).is_err(), "{marker:#x}");
+        }
+        assert_eq!(parse_binary(&small_bplist(&[vec![0x00]])).unwrap(), Value::Null);
+        assert!(parse_binary(&small_bplist(&[vec![0xd1, 1, 2], vec![0x10, 1], vec![0x09]])).is_err());
+        assert_eq!(parse_binary(&small_bplist(&[vec![0xd1, 1, 2], vec![0x51, b'1'], vec![0x09]])).unwrap().get("1"), Some(&Value::Bool(true)));
     }
 
     /// An array (or set) of `n` references to object `child`.
