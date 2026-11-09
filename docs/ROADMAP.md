@@ -1573,6 +1573,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-elf-dynamic-names
 - [x] Refuse short ELF64 header and section records and handle section-table offsets at the address limit safely.
       — claimed: Afloat16, branch bugfix/r3.12-sbpf-records
+- [x] Keep ELF version definitions, requirements and indices within their declared section byte ranges.
+      — claimed: Afloat16, branch bugfix/r3.12-elf-version-section-bounds-20261109
 - [x] Keep PE optional-header reads within the declared header.
       — claimed: Afloat16, branch bugfix/r3.12-pe-optional-header-framing-20261105
 - [x] Use the PE image's declared header extent when an RVA is not mapped by a section.
