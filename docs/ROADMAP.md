@@ -1212,6 +1212,11 @@ Gaps found while using the app for real projects.
       page calls "Open folder" (both `project_open_folder`), and a game's chosen folder was shown as a
       full path in its row, where other chosen folders are shortened, cut to fit and whole on hover
       — claimed: jgt87, branch bugfix/r2.9-same-words-open-folder — PR #1243
+- [x] Colours, corners and text sizes off the theme in the chat, evidence, prompt box, sidebar,
+      palette and Just ask: the Send button's own white and black, two hand-set corner radii,
+      code at 12.5 pt where the rest is 12, an evidence summary at 13/15, and a question drawn in
+      the mode's default size where other card titles are 15 semibold
+      — claimed: jgt87, branch bugfix/r2.9-theme-tokens-type-scale — PR #1279
 
 ### R2.10 Pinned builds
 Owner: maintainers · Status: in progress
