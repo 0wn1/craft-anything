@@ -876,7 +876,7 @@ fn is_without_rowid(sql: &str) -> bool {
 fn without_rowid_order(table: &SchemaObject) -> Option<Vec<Option<usize>>> {
     let generated: Vec<bool> = column_definitions(&table.sql).iter().map(|(_, rest)| is_virtual_column(rest)).collect();
     let is_virtual = |i: usize| generated.get(i).copied().unwrap_or(false);
-    let open = table.sql.find('(')?;
+    let open = column_list_open(&table.sql)?;
     let close = table.sql.rfind(')')?;
     let body = table.sql.get(open.checked_add(1)?..close)?;
     let mut stored = Vec::new();
@@ -970,8 +970,7 @@ pub fn parse_create_columns(sql: &str) -> Vec<Column> {
 fn column_definitions(sql: &str) -> Vec<(Column, &str)> {
     let mut cols = Vec::new();
     // Take the text inside the outermost parentheses.
-    let Some(open) = sql.find('(') else { return cols };
-    let inner = &sql[open + 1..];
+    let Some(inner) = column_list_open(sql).and_then(|open| sql.get(open.checked_add(1)?..)) else { return cols };
     let mut depth = 1usize;
     let mut end = inner.len();
     for token in sql_tokens(inner) {
@@ -1006,6 +1005,13 @@ fn column_definitions(sql: &str) -> Vec<(Column, &str)> {
         cols.push((Column { name, type_name }, rest));
     }
     cols
+}
+
+/// Where a CREATE TABLE's column list opens: the first parenthesis outside quotes, so a table
+/// named `"export (1)"` doesn't start it.
+fn column_list_open(sql: &str) -> Option<usize> {
+    let open = sql_tokens(sql).into_iter().find(|token| *token == "(")?;
+    (open.as_ptr() as usize).checked_sub(sql.as_ptr() as usize)
 }
 
 /// Identify the single INTEGER primary key, excluding the column-level DESC exception.
