@@ -1492,6 +1492,11 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-zip-multidisk-20261105
 - [x] Check Unity bundle blocks against their declared output lengths.
       — claimed: Afloat16, branch bugfix/r3.12-unity-bundle-decompressed-length-20261105
+- [x] Apply standalone LZMA output budgets to its internal dictionary and reject oversized declared output before decoding.
+      — claimed: Afloat16, branch bugfix/r3.12-standalone-lzma-budget-20261109
+      Source [`5da8880d`](https://github.com/Afloat16/craft-anything/commit/5da8880d3b56785498cf0c09ae46f300f070322d) passed [formats tests, fmt and clippy](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226892150)
+      and [layers, locks, secret scanning, wasm checks and Cargo.lock stability](https://github.com/Afloat16/claude-mem/actions/runs/42640688213/job/129240669663).
+      The [unchanged-code baseline](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226895582) reproduces the new regression cases.
 - [x] Expand repeated LZ4 match bytes in blocks when reading Unity bundles.
       — claimed: Afloat16, branch refactor/r3.12-expand-lz4-matches
 - [x] Require terminated cpio pathnames and a complete, empty trailer before reporting an archive as complete.
