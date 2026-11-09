@@ -1298,6 +1298,12 @@ Gaps found while using the app for real projects.
       (`decompiled`), so a run reminds the builder only while it has never decompiled in this
       project. Unit test only; not run live
       — claimed: NeuTroNBZh, branch bugfix/r2.9-decompile-reminder-every-request
+- [x] #1421: a run after the first skipped the study, so in Deep mode its builder's tool server had
+      nothing open and the first `native_*` calls said "Nothing is open yet". Such a run now opens
+      the program the study looked at (`core_target_open`, only when nothing is open, never in
+      Clean room); a failure is said in the feed and the builder can still open it. Unit test
+      only; not run live
+      — claimed: NeuTroNBZh, branch bugfix/1421-reopen-project-target
 - [x] `rebuild_check` said "no build is running" when the run had taken the check and one of its
       steps hadn't finished: on a Windows Unity build, three checks in a row stopped at
       "game-self-test" and the builder gave up after its default 20 minutes, below the run's own
