@@ -1367,6 +1367,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-sbpf-records
 - [x] Keep PE optional-header reads within the declared header.
       — claimed: Afloat16, branch bugfix/r3.12-pe-optional-header-framing-20261105
+- [x] Keep relocation symbol indices inside a linked symbol table and require a linked string table before reporting a syscall name.
+      — claimed: Afloat16, branch bugfix/r3.12-sbpf-symbols
 - [x] Keep PE resource metadata within the resource directory.
       — claimed: Afloat16, branch bugfix/r3.12-pe-resource-directory-boundary-20261105
 - [x] Keep PE version strings whose value is empty (stored with no value at all), such as
