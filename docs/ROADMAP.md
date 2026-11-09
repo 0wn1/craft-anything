@@ -1500,6 +1500,8 @@ Owner: open · Status: in progress
       — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-substitutions
 - [x] Decode binary plist markers and dictionary keys according to their stored types.
       — claimed: Afloat16, branch bugfix/r3.12-bplist-typed-objects
+- [x] Apply the extracted-string limit in file-offset order across UTF-16LE and narrow strings, so an early wide string is not hidden by later ASCII.
+      — claimed: Afloat16, branch bugfix/r3.12-earliest-extracted-strings
 - [x] Visit XML plist values only inside a complete, correctly encoded document.
       — claimed: Afloat16, branch bugfix/r3.12-xml-plist-document
 - [x] Name code-directory flags with the bits Apple uses: hard 0x100, kill 0x200, expires 0x400,
