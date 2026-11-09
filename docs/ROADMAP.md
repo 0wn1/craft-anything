@@ -1579,6 +1579,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-pe-optional-header-framing-20261105
 - [x] Use the PE image's declared header extent when an RVA is not mapped by a section.
       — claimed: Afloat16, branch bugfix/r3.12-pe-header-rva-span
+- [x] Keep PE entry points, import slots and exception function starts from wrapping image-base arithmetic into unrelated addresses.
+      — claimed: Afloat16, branch bugfix/r3.12-pe-virtual-address-overflow-20261109
 - [x] Keep relocation symbol indices inside a linked symbol table and require a linked string table before reporting a syscall name.
       — claimed: Afloat16, branch bugfix/r3.12-sbpf-symbols
 - [x] Keep PE resource metadata within the resource directory.
