@@ -1457,6 +1457,11 @@ Owner: open · Status: in progress
 - [x] Name DriverKit and visionOS simulator Mach-O binaries in the binary view: its platform table
       stopped at 9 and 11, so a `.dext` read "unknown" while the dependency view said "driverkit".
       — claimed: Chr0mium24, branch bugfix/r3.12-macho-platform-names
+- [x] Swift symbols name the right type after an optional, an associated type or an extension.
+      The demangler's substitution list left out `Sg` optionals and `Qz`/`Qy` associated types
+      and added extensions, so a later `A…` reference named the wrong node
+      (`[Swift.String : Swift.String]` where the symbol says `Swift.String?`) or fell out of range.
+      — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-substitutions
 - [x] Decode binary plist markers and dictionary keys according to their stored types.
       — claimed: Afloat16, branch bugfix/r3.12-bplist-typed-objects
 - [x] Visit XML plist values only inside a complete, correctly encoded document.
