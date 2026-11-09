@@ -1442,6 +1442,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-unity-bundle-decompressed-length-20261105
 - [x] Require terminated cpio pathnames and a complete, empty trailer before reporting an archive as complete.
       — claimed: Afloat16, branch bugfix/r3.12-cpio-path-and-trailer
+- [x] Identify regular files sharing an inode and device in newc and CRC archives so hard-link aliases are visible in listings.
+      — claimed: Afloat16, branch feature/r3.12-cpio-hard-link-evidence
 - [x] Locate Unity bundle metadata within the declared bundle size.
       — claimed: Afloat16, branch bugfix/r3.12-unity-bundle-declared-size-20261105
 - [x] Check that Unity bundle compressed blocks end before the trailing block table, or the declared
