@@ -1413,6 +1413,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-ipv4-header-lengths-20261105
 - [x] Validate the version in IPv6 frames.
       — claimed: Afloat16, branch bugfix/r3.12-ipv6-version-20261105
+- [x] Decode VLAN-encapsulated network packets in Linux cooked v1 and v2 captures.
+      — claimed: Afloat16, branch bugfix/r3.12-cooked-vlan-packets
 - [x] Reject negative GNU base-256 values in unsigned tar header fields.
       — claimed: Afloat16, branch bugfix/r3.12-tar-octal-fields
 - [x] Recognize ZIP directories from DOS directory attributes and Unix file-type metadata when the entry name has no trailing slash.
