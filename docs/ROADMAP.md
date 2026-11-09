@@ -1402,6 +1402,13 @@ Owner: open · Status: in progress
       read (with a note) instead of shifting later values onto the wrong columns, in rowid and
       WITHOUT ROWID tables alike.
       — claimed: Chr0mium24, branch bugfix/r3.12-sqlite-virtual-generated-columns
+- [x] Comments in a SQLite CREATE TABLE stay out of its columns: a comma or quote in a comment
+      doesn't split or swallow definitions, a comment before or right after a name isn't part of
+      it, and a comment inside a definition isn't part of its type, so INTEGER PRIMARY KEY still
+      marks the rowid alias.
+      — claimed: Plastic-time, branch bugfix/r3.12-sqlite-create-table-comments
+- [ ] Keep the comma inside a SQLite type's parentheses: `DECIMAL(10, 2)` is listed as
+      `DECIMAL(10 2)`.
 
 ### R3.13 Web inspection correctness
 Owner: open · Status: in progress
