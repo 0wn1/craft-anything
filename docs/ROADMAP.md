@@ -1416,6 +1416,8 @@ Owner: open · Status: in progress
 - [ ] A comment after a SQLite column list that holds `)` (`... WITHOUT ROWID /* ) */`) still hides
       the WITHOUT ROWID marker: find the list's closing parenthesis by tokens, not `rfind(')')`.
 
+- [x] Keep Android binary XML events within their document, chunk and attribute bounds.
+      — claimed: Afloat16, branch bugfix/r3.12-android-xml-events
 - [x] Address the combined parser review: preserve partial Java reference coverage,
       enforce DEX signed 32-bit LEB128 limits, recover legacy AAPT UTF-8 lengths within
       their pool with a shared recovery probe limit, and distinguish missing ext indirect
