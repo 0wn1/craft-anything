@@ -938,6 +938,8 @@ Owner: open · Status: in progress
       — claimed: Plastic-time, branch bugfix/r2.2-yaml-null-table
 - [ ] Live-check #116 on Windows: install Hermes natively, start the app from a launcher, and see
       Settings → AI offer it; #116's "error after every message" has no text yet (asked)
+- [x] Refuse multi-document YAML configs before planning edits or removing registrations.
+      — claimed: Plastic-time, branch rrfz/bugfix-r2.2-yaml-single-document
 - [x] A Hermes `config.yaml` that starts with a byte-order mark gets our entry in its own
       `mcp_servers` table, not in a second one that hides the person's servers from Hermes.
       — claimed: Plastic-time, branch bugfix/r2.2-yaml-config-bom
@@ -1739,6 +1741,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-iostore-complete-header-20261105
 - [x] Reject CBOR collections that exceed the EVM metadata reader's limits and invalid text strings.
       — claimed: Afloat16, branch bugfix/r3.12-evm-cbor
+- [x] Keep EVM bytecode intact when its CBOR trailer repeats a metadata key or uses a non-text map key.
+      — claimed: Afloat16, branch bugfix/r3.12-evm-cbor-map-keys-20261110
 - [x] Require evidence of a rejecting payment branch before labelling EVM functions nonpayable; reading CALLVALUE alone accepts payments.
       — claimed: Afloat16, branch bugfix/r3.12-evm-payment-guards
 - [x] Avoid rescanning every retained EVM selector for repeated dispatcher comparisons.
