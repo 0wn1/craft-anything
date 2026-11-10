@@ -1690,6 +1690,8 @@ Owner: open · Status: in progress
       Preserve empty multicast/unicast DNS-SD TXT records using wire-label service instance names.
 - [x] Verify ECDSA keys using their declared named curve and reject missing, malformed or unsupported parameters instead of selecting a curve from the point length.
       — claimed: Afloat16, branch bugfix/r3.12-ec-named-curve-20261110
+- [x] Verify RSASSA-PSS signatures using their declared digest, mask and salt parameters, enforce PSS public-key constraints, and require signed and outer certificate parameters to agree.
+      — claimed: Afloat16, branch bugfix/r3.12-rsa-pss-parameters-20261110
 - [x] Validate DER algorithm identifiers, signature and key bit strings, and name fields before using them as certificate verification inputs.
       — claimed: Afloat16, branch bugfix/r3.12-der-verification-fields
 - [x] Reject certificates whose signed signature-algorithm OID conflicts with the outer algorithm before reporting a verified signature.
@@ -1798,6 +1800,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-macho-zerofill-section-data
 - [x] Keep native address translations and reads inside both the mapped range and its file-backed bytes.
       — claimed: Afloat16, branch bugfix/r3.12-binary-padding
+- [x] List each Objective-C class and category address once when ordinary and non-lazy registration tables overlap, keeping distinct same-named definitions separate.
+      — claimed: Afloat16, branch bugfix/r3.12-objc-nonlazy-identity-20261111
 - [x] Require complete Objective-C method record strides before reading absolute or relative method fields.
       — claimed: Afloat16, branch bugfix/r3.12-objc-method-record-stride-20261109
 - [x] Keep Mach-O function starts within their declared payload.
@@ -1822,6 +1826,12 @@ Owner: open · Status: in progress
       type, but the demangler had no `w` operator and reported it invalid ("unsupported operator
       'w'"): `_$ss6ResultOwug` is `getEnumTag value witness for Swift.Result`.
       — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-value-witnesses
+- [x] Swift lazy witness table cache variables decode. A symbol ending `WL` names a type and
+      the conformance it is used with, as `Wl` does, but the demangler read only one operand and
+      reported it invalid ("N nodes left after decoding"):
+      `_$s7SwiftUI4EdgeO3SetVAESQAAWL` is `lazy protocol witness table cache variable for type
+      SwiftUI.Edge.Set and conformance SwiftUI.Edge.Set : Swift.Equatable in SwiftUI`.
+      — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-witness-cache
 - [x] Swift enum case symbols decode. A symbol ending `WC` is the function that builds an enum
       case, but the demangler read `WC` as an unknown witness kind and reported it invalid
       ("unsupported witness kind"): `_$s10FindMyBase3BitO3oneyA2CmFWC` is
