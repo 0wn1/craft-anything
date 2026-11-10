@@ -2029,6 +2029,8 @@ Owner: open · Status: in progress
       — claimed: Plastic-time, branch rrfz/bugfix-r3.12-annotation-20261110
 - [x] Keep DOS relocations inside the declared executable header.
       — claimed: Afloat16, branch bugfix/r3.12-dos-relocation-header-boundary-20261105
+- [x] Report contradictory DOS executable size declarations as header problems.
+      — claimed: Plastic-time, branch rrfz/bugfix-r3.12-mz-header-20261110
 - [x] Keep relocation reads within their declared entry stride and never invent an addend for a truncated RELA.
       — claimed: Afloat16, branch bugfix/r3.12-sbpf-rela
 - [x] Use the sorted section and segment boundaries during source-map position lookups so repeated symbolication visits only matching positions.
