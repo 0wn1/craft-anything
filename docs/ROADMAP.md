@@ -1892,6 +1892,8 @@ Owner: open · Status: in progress
       — claimed: Chr0mium24, branch bugfix/r3.12-codesign-flag-names
 - [x] Keep code-signature children and verification reads within their declared superblob.
       — claimed: Afloat16, branch bugfix/r3.12-codesign-superblob-length-boundary-20261105
+- [x] Require complete, single-valued CMS message-digest and content-type signed attributes with the specified tags, and bind the content type to the encapsulated content before reporting authentication.
+      — claimed: Afloat16, branch bugfix/r3.12-cms-signed-attributes-20261110
 - [x] Reject out-of-range or unterminated library names in the ELF dynamic string table.
       — claimed: Afloat16, branch bugfix/r3.12-elf-dynamic-names
 - [x] Recover dynamic symbols through PT_DYNAMIC when an ELF retains other section headers but has no usable dynamic-symbol section.
@@ -1942,6 +1944,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-go-name-bytes-20261110
 - [x] Keep the report's function display limit from marking a valid large WebAssembly module as mismatched.
       — claimed: Afloat16, branch bugfix/r3.12-wasm-function-count
+- [x] Reject TypeSpec handles where CLI class/value-type and generic signatures require TypeDef or TypeRef, while retaining standalone TypeSpec and custom-modifier decoding.
+      — claimed: Afloat16, branch bugfix/r3.12-dotnet-signature-type-handles-20261110
 - [x] Preserve complete Unicode characters in shortened .NET strings.
       — claimed: Afloat16, branch bugfix/r3.12-dotnet-user-string-surrogate-limit-20261105
 - [x] Validate CIL method exception-section kinds, extents and complete clause records before reading exception handlers.
