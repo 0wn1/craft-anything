@@ -1585,6 +1585,9 @@ Owner: open · Status: in progress
       The [unchanged-production baseline](https://github.com/Afloat16/claude-mem/actions/runs/42659466852/job/129306793039) reproduces four failed guards while seven compatibility controls pass.
 - [x] Extract legacy PyInstaller PYZ data as raw files and report modern namespace packages without fabricating bytecode.
       — claimed: Afloat16, branch bugfix/r3.12-pyz-member-kinds
+- [x] Bound retained expanded PYZ paths across nested archives before allocating repeated prefixes;
+      preserve complete entry identities and declared module counts in partial listings.
+      — claimed: Afloat16, branch bugfix/r3.12-pyz-expanded-path-budget-20261110
 - [x] Keep PyInstaller CArchive member reads before the table and cookie, including signed files with trailing bytes.
       — claimed: Afloat16, branch bugfix/r3.12-carchive-payload-range-20261109
       Source [`a5bcfaed`](https://github.com/Afloat16/craft-anything/commit/a5bcfaedcb1ad67c8bb7f06c7143befc8292409c) passed [formats tests, fmt and clippy](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226891917)
