@@ -1689,6 +1689,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-certificate-signature-oids-20261110
 - [x] Distinguish literal punctuation and multi-valued attributes in the displayed X.509 issuer and subject.
       — claimed: Afloat16, branch bugfix/r3.12-certificate-name-rendering
+- [x] Match CMS signer certificates by issuer and serial number or subject key identifier; leave absent matches unknown instead of selecting an unrelated certificate and chain.
+      — claimed: Afloat16, branch bugfix/r3.12-cms-signer-identities-20261110
 - [x] Read HTTP Host fields only from the header section.
       — claimed: Afloat16, branch bugfix/r3.12-http-host-boundary-20261105
 - [x] Select certificate issuers by successful signature verification among matching names, follow self-issued key rollover, and report interrupted chains as incomplete.
@@ -2067,6 +2069,12 @@ Owner: open · Status: in progress
       prints `(() -> Swift.Int)?`. An optional protocol composition read `main.P & main.Q?` for
       `(main.P & main.Q)?`.
       — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-optional-functions
+- [x] Swift special types decode. A type written with `X` and a kind letter (a non-escaping
+      closure `XE`, an `AnyObject` or class-and-protocol existential, a protocol metatype, a
+      `@convention` or `@autoclosure` function, `Self`, a `weak` or `unowned` type) was reported
+      invalid ("unsupported special type"): `_$s13IDEConsoleKit0A5ThemeC22infoTypeThumbnailImageSo7NSImageCvgAFyXEfU_`
+      is `closure #1 () -> __C.NSImage in IDEConsoleKit.IDEConsoleTheme.infoTypeThumbnailImage.getter : __C.NSImage`.
+      — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-special-types
 - [x] Python 3.5.0, 3.5.1 and 3.5.2 wrote magic number 3350 into their `.pyc` files, and 3.5.3
       moved to 3351. A file with 3350 is reported as a 3.5 pre-release (`is_release: false`), with
       a note that its code layout may differ. Count 3350 and 3351 as releases of 3.5.
