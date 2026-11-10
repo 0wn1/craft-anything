@@ -2147,6 +2147,9 @@ Owner: open · Status: in progress
       moved to 3351. A file with 3350 is reported as a 3.5 pre-release (`is_release: false`), with
       a note that its code layout may differ. Count 3350 and 3351 as releases of 3.5.
       — claimed: Chr0mium24, branch bugfix/r3.12-pyc-3-5-release-magic
+- [x] Wrap extracted PYZ code with the header length required by its Python magic number;
+      preserve the marshal payload and apply the same version-specific size to extraction limits.
+      — claimed: Afloat16, branch bugfix/r3.12-pyz-version-headers-20261110
 - [x] Swift addressors decode. After `a` (mutable) or `l`, an addressor has a letter for its kind
       (`u` for unsafe), but the demangler read only the `a` and took the kind letter for another
       operator, so every addressor was reported invalid: `_$s5Books19PAGETURNLOG_ENABLEDSbvau` is
