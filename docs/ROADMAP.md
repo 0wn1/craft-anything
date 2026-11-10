@@ -1376,6 +1376,9 @@ Gaps found while using the app for real projects.
 - [x] Settings → AI: a card for an AI found on this computer wraps its description beside its Add
       button; the line didn't wrap and ran on under the button
       — claimed: jgt87, branch bugfix/r2.9-detected-cards-wrap — PR #1235
+- [x] Settings → AI: Providers, Harnesses and Detect share consistent spacing below the discovery
+      heading and wrap together, so the Detect action cannot overlap a tab
+      — claimed: istaari, branch bugfix/ai-detection-spacing — PR #1530
 - [x] The same action reads the same everywhere: a pin's menu said "Show folder" for what the project
       page calls "Open folder" (both `project_open_folder`), and a game's chosen folder was shown as a
       full path in its row, where other chosen folders are shortened, cut to fit and whole on hover
@@ -1752,6 +1755,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-tensor-zero-dimension-product-20261105
 - [x] Find APK signatures through valid ZIP comments and framed central directories.
       — claimed: Afloat16, branch bugfix/r3.12-apk-sign-eocd-comment-boundary-20261105
+- [x] Require APK signer SDK ranges and ordered signature-algorithm lists to match their signed copies, with complete required signer fields, before reporting verification.
+      — claimed: Afloat16, branch bugfix/r3.12-apk-signed-metadata-20261110
 - [x] Keep Android resource packages, child chunks and library records inside their enclosing declared ranges.
       — claimed: Afloat16, branch bugfix/r3.12-arsc-parent-chunk-boundaries-20261109
       Source `ea680eeb9e92`; [format checks](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226895431) and [compatibility gates](https://github.com/Afloat16/claude-mem/actions/runs/42642583301/job/129247271153) passed.
@@ -1925,6 +1930,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-index-map-boundaries
 - [x] Preserve the URL delimiter in source-map roots when resolving a relative source file.
       — claimed: Afloat16, branch bugfix/r3.12-source-map-url-root
+- [x] Keep source map annotation URL suffixes intact.
+      — claimed: Plastic-time, branch rrfz/bugfix-r3.12-annotation-20261110
 - [x] Keep DOS relocations inside the declared executable header.
       — claimed: Afloat16, branch bugfix/r3.12-dos-relocation-header-boundary-20261105
 - [x] Keep relocation reads within their declared entry stride and never invent an addend for a truncated RELA.
@@ -2063,6 +2070,11 @@ Owner: open · Status: in progress
       operator, so every addressor was reported invalid: `_$s5Books19PAGETURNLOG_ENABLEDSbvau` is
       `Books.PAGETURNLOG_ENABLED.unsafeMutableAddressor : Swift.Bool`.
       — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-addressors
+- [x] Swift async thunks decode. `Tu` is the async function pointer of the function before it, and
+      `TY` and `TQ` with an index are its suspend and await resume functions, but the demangler
+      reported all three as an unsupported thunk, so `_$s10XCTestCore5QueueC11synchronizeyyYaFTY0_`
+      is `(1) suspend resume partial function for XCTestCore.Queue.synchronize() async -> ()`.
+      — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-thunks
 - [x] Swift subscript accessors print the accessor after `subscript` and the type after a colon,
       as `swift-demangle` does. The demangler put the accessor last, so
       `_$s10Foundation4DataV06InlineB0Vys5UInt8VSiciM` read
