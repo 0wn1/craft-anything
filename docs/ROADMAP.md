@@ -1891,6 +1891,12 @@ Owner: open · Status: in progress
       demangler read `Qy_` as `A`, so `Swift.Zip2Sequence.Iterator.next()` returned
       `(A.Element, A.Element)?` where the symbol says `(A.Element, B.Element)?`.
       — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-associated-type-index
+- [x] Swift metadata symbols name their kind the way `swift-demangle` does. `MN` reads as
+      noncanonical specialized generic type metadata (`_$sSRys6UInt16VGMN`), `Mj` as an opaque
+      type descriptor accessor key and `Mz` as a flag for loading canonical specialized generic
+      type metadata. The demangler printed `type metadata for`, `module descriptor` and `type
+      metadata heap reference for` for them.
+      — claimed: Chr0mium24, branch bugfix/r3.12-swift-demangle-metadata-names
 - [x] Decode binary plist markers and dictionary keys according to their stored types.
       — claimed: Afloat16, branch bugfix/r3.12-bplist-typed-objects
 - [x] Swift initialisers of structs, enums, protocols and extensions read `init`. The demangler
