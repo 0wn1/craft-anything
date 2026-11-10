@@ -1585,6 +1585,9 @@ Owner: open · Status: in progress
       The [unchanged-production baseline](https://github.com/Afloat16/claude-mem/actions/runs/42659466852/job/129306793039) reproduces four failed guards while seven compatibility controls pass.
 - [x] Extract legacy PyInstaller PYZ data as raw files and report modern namespace packages without fabricating bytecode.
       — claimed: Afloat16, branch bugfix/r3.12-pyz-member-kinds
+- [x] Bound retained expanded PYZ paths across nested archives before allocating repeated prefixes;
+      preserve complete entry identities and declared module counts in partial listings.
+      — claimed: Afloat16, branch bugfix/r3.12-pyz-expanded-path-budget-20261110
 - [x] Keep PyInstaller CArchive member reads before the table and cookie, including signed files with trailing bytes.
       — claimed: Afloat16, branch bugfix/r3.12-carchive-payload-range-20261109
       Source [`a5bcfaed`](https://github.com/Afloat16/craft-anything/commit/a5bcfaedcb1ad67c8bb7f06c7143befc8292409c) passed [formats tests, fmt and clippy](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226891917)
@@ -1592,6 +1595,10 @@ Owner: open · Status: in progress
       The [unchanged-code baseline](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226895582) reproduces the new regression cases.
 - [x] Bound rejected ASAR names by the archive listing limit.
       — claimed: Afloat16, branch bugfix/r3.12-asar-limit-bounds-20261107
+- [x] Bound retained ASAR entry and rejected-name paths before expanding shared directory prefixes;
+      preserve complete member identities and report a partial listing when the byte budget is reached.
+      Extract recovered members with partial coverage and no claimed total when a listing is incomplete.
+      — claimed: Afloat16, branch bugfix/r3.12-asar-path-budget-20261110
 - [x] Keep embedded Godot pack tables and member reads before the executable's pack trailer.
       — claimed: Afloat16, branch bugfix/r3.12-godot-trailer-boundary-20261109
       Source `9744a0569a7c`; [format checks](https://github.com/Afloat16/claude-mem/actions/runs/42633003467/job/129213811429) and [compatibility gates](https://github.com/Afloat16/claude-mem/actions/runs/42642583301/job/129247271153) passed.
@@ -2143,6 +2150,9 @@ Owner: open · Status: in progress
       moved to 3351. A file with 3350 is reported as a 3.5 pre-release (`is_release: false`), with
       a note that its code layout may differ. Count 3350 and 3351 as releases of 3.5.
       — claimed: Chr0mium24, branch bugfix/r3.12-pyc-3-5-release-magic
+- [x] Wrap extracted PYZ code with the header length required by its Python magic number;
+      preserve the marshal payload and apply the same version-specific size to extraction limits.
+      — claimed: Afloat16, branch bugfix/r3.12-pyz-version-headers-20261110
 - [x] Swift addressors decode. After `a` (mutable) or `l`, an addressor has a letter for its kind
       (`u` for unsafe), but the demangler read only the `a` and took the kind letter for another
       operator, so every addressor was reported invalid: `_$s5Books19PAGETURNLOG_ENABLEDSbvau` is
