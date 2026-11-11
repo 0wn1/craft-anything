@@ -2174,6 +2174,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-ext-special-inode-kinds-20261111
 - [x] Use ordered visited-node membership in ROMFS, ext, SquashFS and JFFS2 directory walks so wide filesystem trees avoid repeated scans of every previously visited node.
       — claimed: Afloat16, branch bugfix/r3.12-filesystem-page-visits-20261110
+- [x] Read JFFS2 node, inode and directory integers in the filesystem byte order, including images with erased leading space, and disclose mixed byte orders.
+      — claimed: Afloat16, branch feature/r3.12-jffs2-big-endian-20261110
 - [x] Read ROMFS names at the configured name-length limit.
       — claimed: Plastic-time, branch rrfz/bugfix-r3.12-romfs-name-20261110
 - [x] Read regular ext4 inline files up to the 60-byte inode payload while preserving byte budgets; unsupported inline continuations and directory layouts remain explicitly unrecovered.
