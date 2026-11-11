@@ -2200,6 +2200,8 @@ Owner: open · Status: in progress
       Shared-budget revision `29c48e03` passed [full Linux CI](https://github.com/storytold/craft-anything/actions/runs/41762780268).
       The merge with main `41d2175e` awaits a new CI run.
 
+- [x] Expose SVCB/HTTPS target and service parameters, SSHFP/TLSA authentication data, and NAPTR/URI/DNAME discovery values through bounded DNS answer decoding.
+      — claimed: Afloat16, branch feature/r3.12-dns-service-bindings
 - [x] Keep DNS answer names inside their declared RDATA, including compressed names and MX
       exchanges, and report malformed records as incomplete instead of inventing answer values,
       while preserving legal empty DNS UPDATE RRset prerequisites
