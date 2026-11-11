@@ -200,6 +200,16 @@ fn output_text(run: &Value, names: &[String]) -> String {
     text
 }
 
+/// Numbers read back in a note: a few of them, or how many there were.
+fn listed(numbers: &[&str]) -> String {
+    match numbers {
+        [] => "nothing".to_string(),
+        [one] => (*one).to_string(),
+        [a, b] => format!("{a} and {b}"),
+        [a, b, more @ ..] => format!("{a}, {b} and {} more", more.len()),
+    }
+}
+
 /// Dice over word counts, 0..=100; two empty outputs are alike.
 fn alike(a: &std::collections::BTreeMap<String, usize>, b: &std::collections::BTreeMap<String, usize>) -> f64 {
     let (ta, tb): (usize, usize) = (a.values().sum(), b.values().sum());
@@ -252,6 +262,27 @@ fn run_comparison(original: &Value, built: &Value, names: &[String]) -> (Vec<Cla
                 } else {
                     (0.0, false, "numeric output could not be compared".to_string())
                 }
+            } else if website::words(&original_words).is_empty() && website::words(&built_words).is_empty() {
+                // Nothing but numbers, beside punctuation: word likeness has nothing to weigh (it
+                // keeps only words of two characters or more), so two different numbers would read
+                // as identical output. Without a repeat to say which numbers vary, compare the
+                // numbers themselves.
+                let matches = original_numbers == built_numbers;
+                let detail = if matches {
+                    format!("only numbers were printed, and they match in order ({})", listed(&original_numbers))
+                } else if let Some(at) = original_numbers.iter().zip(&built_numbers).position(|(a, b)| a != b) {
+                    // Name the first difference, not the whole lists: a long output would only say
+                    // "and n more" on both sides.
+                    format!(
+                        "only numbers were printed: number {} is {} where the original prints {}",
+                        at + 1,
+                        built_numbers.get(at).copied().unwrap_or("missing"),
+                        original_numbers.get(at).copied().unwrap_or_default()
+                    )
+                } else {
+                    format!("only numbers were printed: it prints {} numbers where the original prints {}", built_numbers.len(), original_numbers.len())
+                };
+                (legacy_score, matches, detail)
             } else {
                 (legacy_score, true, format!("{legacy_score:.0}% of the words match; numeric stability was not observed, so only words were compared"))
             }
@@ -360,6 +391,32 @@ mod tests {
             assert!(claims.iter().all(|c| c.passed));
             assert!(detail.contains("numeric stability was not observed"), "{detail}");
         }
+    }
+
+    #[test]
+    fn numbers_printed_alone_are_compared_without_a_repeat() {
+        let run = |line: &str| json!({"reason":"exited", "exit_code":0, "lines":[line]});
+        // Bare `4.5` and `9.0`: word likeness drops one-character words, so this was 100% alike.
+        let (claims, detail) = run_comparison(&run("4.5"), &run("9.0"), &[]);
+        assert!(!claims[1].passed, "different numbers are different output: {detail}");
+        assert!(claims[1].detail.contains("9.0") && claims[1].detail.contains("4.5"), "{}", claims[1].detail);
+        let (claims, detail) = run_comparison(&run("4.5"), &run("4.5"), &[]);
+        assert!(claims.iter().all(|c| c.passed), "the same number still matches: {detail}");
+        assert!(detail.contains("only numbers were printed"), "{detail}");
+        // Printing nothing where the original printed a number isn't alike either.
+        let (claims, detail) = run_comparison(&run("4.5"), &run(""), &[]);
+        assert!(!claims[1].passed, "{detail}");
+        assert!(detail.contains("0 numbers where the original prints 1"), "{detail}");
+        // Punctuation around the numbers doesn't make them text.
+        let (claims, detail) = run_comparison(&run("[4.5]"), &run(""), &[]);
+        assert!(!claims[1].passed, "brackets aren't words: {detail}");
+        // A long output names where it first differs, not "and n more" on both sides.
+        let (claims, detail) = run_comparison(&run("1 2 3 4 5"), &run("1 2 9 4 5"), &[]);
+        assert!(!claims[1].passed && detail.contains("number 3 is 9 where the original prints 3"), "{detail}");
+        // Words beside the numbers still decide: a timing that differs is not a failed build.
+        let (claims, detail) = run_comparison(&run("Result 42 completed in 123 ms"), &run("Result 42 completed in 987 ms"), &[]);
+        assert!(claims.iter().all(|c| c.passed), "{detail}");
+        assert!(detail.contains("numeric stability was not observed"), "{detail}");
     }
 
     #[test]
