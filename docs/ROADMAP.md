@@ -2144,6 +2144,8 @@ Owner: open · Status: in progress
       PAX sizes across other metadata records; CRC cpio checks member data; source maps decode
       percent-escaped data URLs and report indexed-map columns in the generated file
       (#606–#615, by Afloat16)
+- [x] Use the existing bounded raw LZ4 decoder for SquashFS metadata, regular data blocks and tail fragments while retaining Unity's exact decoded-size contract.
+      — claimed: Afloat16, branch feature/r3.12-squashfs-lz4-20261110
 - [x] Report truncated SquashFS metadata blocks and retain previously recovered blocks.
       — claimed: Afloat16, branch bugfix/r3.12-squashfs-metadata-warning
 - [x] Require each raw or decoded file block to cover exactly its logical range, including the partial final block, so short blocks cannot shift later contents and long blocks cannot be hidden by truncation.
