@@ -2152,6 +2152,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-jffs2-decoded-node-lengths-20261111
 - [x] Bound filesystem and archive recovery by the recorded image, node, directory and member limits.
       — claimed: Afloat16, branch bugfix/r3.12-filesystem-archive-bounds
+- [x] Use the version-two cramfs size to bound root, directory and data reads in either byte order while preserving version-one compatibility.
+      — claimed: Afloat16, branch bugfix/r3.12-cramfs-v2-image-size-20261110
 - [x] Recover cramfs direct block pointers, including shared uncompressed pages and length-prefixed compressed blocks.
       — claimed: Afloat16, branch feature/r3.12-cramfs-direct-block-pointers-20261111
 - [x] Recover files and symlinks from cramfs blocks marked uncompressed while preserving mixed compressed runs and recovery limits.
