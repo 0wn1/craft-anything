@@ -2183,6 +2183,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-jar-attribute-bytes-20261110
 - [x] Merge digest attributes across repeated JAR manifest sections for the same entry, honoring later attribute values while retaining absent earlier values and checking each file once.
       — claimed: Afloat16, branch bugfix/r3.12-jar-repeated-entry-sections-20261110
+- [x] Connect class literals, method types, method handles and dynamic bootstrap arguments to their actual load or call instruction, with a shared linkage-work limit.
+      — claimed: Afloat16, branch feature/r3.12-jvm-bootstrap-references
 - [x] Find the method parameter terminator outside object type names in JVM descriptors.
       — claimed: Afloat16, branch bugfix/r3.12-java-descriptor-boundary
 - [x] Validate complete JVM switch payloads before reserving pairs, and reject duplicate or descending lookup keys instead of emitting invalid control-flow facts.
