@@ -1574,6 +1574,8 @@ Owner: open · Status: in progress
       (Deep only) reads it paged by lines with coverage, counts invalid bytes and cuts long lines;
       triage names it for a text file it doesn't otherwise recognise
       — claimed: chordpli, branch feature/r3.11-text-source-read
+- [x] Keep text-read coverage partial when a line was cut, even when that line is the last one in the file.
+      — claimed: Afloat16, branch bugfix/r3.11-cut-text-coverage-20261110
 - [x] Live-check #539 in an agent chat (Codex, as reported, and Claude Code): the agent reaches
       `core_text_read` for a script or Markdown target, instead of searching bytes. On macOS with
       `chat --deep` and a `.md` or `.ps1` target: Claude Code 2.1.322 (`.md`) called triage and
