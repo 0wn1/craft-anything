@@ -1,9 +1,10 @@
 //! A minimal read-only ext2/3/4 reader: the superblock, block-group descriptors (32- or 64-byte),
 //! inodes, directory entries, and regular-file data via either classic block pointers
-//! (direct/indirect/double-indirect) or ext4 extent trees (depth 0 and 1). It extracts regular
-//! files (including small ext4 inline files), directories and fast symlinks from the root inode down, strictly bounded.
+//! (direct, single-, double- and triple-indirect) or ext4 extent trees (depth 0 and 1).
+//! It extracts regular files (including small ext4 inline files), directories and fast symlinks
+//! from the root inode down, strictly bounded.
 //!
-//! Deliberately NOT handled (reported in warnings): triple-indirect blocks, larger inline files and inline directories, directory
+//! Deliberately NOT handled (reported in warnings): larger inline files and inline directories, directory
 //! HTree index specifics (directories are read as linear entry lists, which is layout-compatible),
 //! encryption, and 64-bit block numbers beyond the low 32 bits. These make a file appear as
 //! unrecovered rather than producing wrong bytes.
@@ -110,7 +111,7 @@ fn file_block_map(data: &[u8], sb: &Sb, inode_off: u64, flags: u32, nblocks: u64
             }
         }
         // Each root owns its full logical span, including when its pointer is zero.
-        for (level, slot, first) in [(1, 48, 12), (2, 52, 12 + per)] {
+        for (level, slot, first) in [(1, 48, 12), (2, 52, 12 + per), (3, 56, 12 + per + per * per)] {
             logical = first;
             if let Some(root) = r.u32_le(ib + slot).filter(|&p| p != 0)
                 && let Err(block) = read_indirect(data, sb, u64::from(root), level, per, &mut logical, &mut map)
@@ -120,29 +121,25 @@ fn file_block_map(data: &[u8], sb: &Sb, inode_off: u64, flags: u32, nblocks: u64
                 return None;
             }
         }
-        if nblocks > 12 + per + per * per && r.u32_le(ib + 56).is_some_and(|p| p != 0) {
-            img.warn("ext: triple-indirect blocks are not followed");
-            img.complete = false;
-            return None;
-        }
     }
     Some(map)
 }
 
 fn read_indirect(data: &[u8], sb: &Sb, block: u64, level: u8, per: u64, logical: &mut u64, map: &mut Vec<Option<u64>>) -> Result<(), u64> {
-    if *logical as usize >= map.len() {
+    if usize::try_from(*logical).ok().is_none_or(|i| i >= map.len()) {
         return Ok(());
     }
     let b = block_bytes(data, sb, block).ok_or(block)?;
     let r = Reader::new(b);
     for i in 0..per {
-        if *logical as usize >= map.len() {
+        if usize::try_from(*logical).ok().is_none_or(|i| i >= map.len()) {
             return Ok(());
         }
         let off = usize::try_from(i.saturating_mul(4)).map_err(|_| block)?;
         let ptr = r.u32_le(off).ok_or(block)?;
         if ptr == 0 {
-            *logical += if level == 1 { 1 } else { per };
+            let span = per.checked_pow(u32::from(level.saturating_sub(1))).ok_or(block)?;
+            *logical = logical.checked_add(span).ok_or(block)?;
             continue;
         }
         if level == 1 {

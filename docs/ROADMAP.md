@@ -2176,6 +2176,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch feature/r3.12-cramfs-direct-block-pointers-20261111
 - [x] Recover files and symlinks from cramfs blocks marked uncompressed while preserving mixed compressed runs and recovery limits.
       — claimed: Afloat16, branch bugfix/r3.12-cramfs-uncompressed-blocks-20261110
+- [x] Follow the third classic ext block-pointer level, preserving the full logical span of sparse subtrees and refusing unavailable mapping blocks.
+      — claimed: Afloat16, branch feature/r3.12-ext-triple-indirect-20261110
 - [x] Preserve ext device, socket and FIFO inode kinds without exposing their block fields as regular-file contents.
       — claimed: Afloat16, branch bugfix/r3.12-ext-special-inode-kinds-20261111
 - [x] Use ordered visited-node membership in ROMFS, ext, SquashFS and JFFS2 directory walks so wide filesystem trees avoid repeated scans of every previously visited node.
