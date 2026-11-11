@@ -185,6 +185,28 @@ fn escaped_name_value(value: &str) -> String {
     out
 }
 
+/// Keep unsupported or malformed name values distinct instead of replacing their bytes.
+fn decoded_name_value(data: &[u8], value: &Tlv) -> String {
+    use std::fmt::Write;
+    let bytes = value.bytes(data).unwrap_or_default();
+    let decoded: Option<String> = match value.tag {
+        0x0c => std::str::from_utf8(bytes).ok().map(str::to_owned),
+        0x12 | 0x13 | 0x16 | 0x1a if bytes.is_ascii() => std::str::from_utf8(bytes).ok().map(str::to_owned),
+        0x14 => Some(bytes.iter().copied().map(char::from).collect()),
+        0x1e if bytes.len().is_multiple_of(2) => bytes.as_chunks::<2>().0.iter().map(|unit| char::from_u32(u32::from(u16::from_be_bytes(*unit)))).collect(),
+        0x1c if bytes.len().is_multiple_of(4) => bytes.as_chunks::<4>().0.iter().map(|unit| char::from_u32(u32::from_be_bytes(*unit))).collect(),
+        _ => None,
+    };
+    if let Some(decoded) = decoded {
+        return escaped_name_value(&decoded);
+    }
+    let mut encoded = String::from("#");
+    for byte in value.whole(data).unwrap_or_default() {
+        let _ = write!(encoded, "{byte:02x}");
+    }
+    encoded
+}
+
 /// A distinguished name as `CN=…, O=…`.
 pub fn name(data: &[u8], seq: &Tlv) -> String {
     let mut parts = Vec::new();
@@ -195,7 +217,7 @@ pub fn name(data: &[u8], seq: &Tlv) -> String {
             if let (Some(o), Some(v)) = (kids.first(), kids.get(1)) {
                 let id = oid(o.bytes(data).unwrap_or(&[]));
                 let key = oid_name(&id).map(str::to_string).unwrap_or(id);
-                attributes.push(format!("{key}={}", escaped_name_value(&text(data, v))));
+                attributes.push(format!("{key}={}", decoded_name_value(data, v)));
             }
         }
         if !attributes.is_empty() {
