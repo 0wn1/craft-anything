@@ -1550,6 +1550,8 @@ Owner: open · Status: in progress
       All 24 combined replay regressions pass locally on the refresh onto `cf414ff4`.
       See this PR's checks for the refreshed revision's complete gate.
       — claimed: Afloat16, branch bugfix/r3.11-standin-sample-metadata-20261103b
+- [x] Keep evidence-based call paths within one input binary, rejecting mixed or missing source content identities.
+      — claimed: Afloat16, branch bugfix/r3.11-call-path-input-identity-20261110
 - [x] `native_publisher_show` hashes the file minus the signature fields, not section by section;
       a file with unusual gaps between sections can read as different — the hash now follows
       Windows' order (headers, each section by its data's file offset, then the bytes after them,
