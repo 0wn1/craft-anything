@@ -1776,6 +1776,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-capture-timing-framing
 - [x] Report capped ZIP, tar and cpio member walks as incomplete firmware extraction, even when skipped directory entries hide later files.
       — claimed: Afloat16, branch bugfix/r3.12-firmware-member-scan-completeness-20261110
+- [x] Recognize Unix file modes from macOS ZIP hosts and the DOS directory attribute from VFAT hosts, preserving directory and symlink identity without a trailing slash.
+      — claimed: Afloat16, branch bugfix/r3.12-macos-vfat-directory-attributes
 - [x] Keep ZIP directory entries within the declared directory.
       — claimed: Afloat16, branch bugfix/r3.12-zip-directory-bounds-20261105
 - [x] Refuse split ZIP archives without their other volumes.
