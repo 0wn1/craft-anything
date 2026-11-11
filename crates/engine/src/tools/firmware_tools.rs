@@ -397,6 +397,7 @@ fn firmware_image_extract(ctx: &mut Ctx<'_>, params: Value) -> Result<ToolOutput
     let mut jobs = vec![Job { data: data.to_vec(), dir: Vec::new(), level: 0, parent: "<input>".into(), base }];
     let mut scanned = 0usize;
     let mut scan_truncated = false;
+    let mut member_scan_truncated = false;
     while let Some(job) = jobs.pop() {
         ctx.cancel.check()?;
         scanned += 1;
@@ -499,6 +500,7 @@ fn firmware_image_extract(ctx: &mut Ctx<'_>, params: Value) -> Result<ToolOutput
                 }
                 (Unpack::Members, "zip") => match zip::parse(slice, p.max_output_files.saturating_mul(2)) {
                     Ok(z) => {
+                        member_scan_truncated |= z.truncated;
                         for e in z.entries.iter().filter(|e| !e.is_dir) {
                             ctx.cancel.check()?;
                             let shown = format!("{label}.extracted/{}", e.name);
@@ -534,6 +536,7 @@ fn firmware_image_extract(ctx: &mut Ctx<'_>, params: Value) -> Result<ToolOutput
                     let listing = if kind == "tar" { tarcpio::tar(slice, p.max_output_files) } else { tarcpio::cpio(slice, p.max_output_files) };
                     match listing {
                         Some(l) => {
+                            member_scan_truncated |= l.truncated;
                             for m in &l.members {
                                 ctx.cancel.check()?;
                                 let shown = format!("{label}.extracted/{}", m.name);
@@ -640,7 +643,13 @@ fn firmware_image_extract(ctx: &mut Ctx<'_>, params: Value) -> Result<ToolOutput
             format!("A scan stopped at max_regions={}; extract smaller ranges to recover omitted regions.", ScanOptions::default().max_regions),
         ));
     }
-    let truncated = w.truncated || scan_truncated;
+    if member_scan_truncated {
+        lims.push(Limitation::new(
+            "truncated",
+            "An archive member scan stopped early; inspect the archive or raise max_output_files if the member limit was reached.",
+        ));
+    }
+    let truncated = w.truncated || scan_truncated || member_scan_truncated;
     let complete = !truncated && w.skipped.is_empty() && deeper_than_limit == 0;
     let ev = builder(
         ctx,
