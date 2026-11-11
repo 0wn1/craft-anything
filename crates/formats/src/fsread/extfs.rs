@@ -85,7 +85,12 @@ fn file_block_map(data: &[u8], sb: &Sb, inode_off: u64, flags: u32, nblocks: u64
     let mut map = vec![None; n];
     if flags & 0x8_0000 != 0 {
         // ext4 extent tree rooted in i_block.
-        extents(data, sb, ib, &mut map, 0, img);
+        let mut remaining = 1_000_000usize;
+        if extents(data, sb, ib, &mut map, None, &mut remaining).is_none() {
+            img.warn("ext4: extent mapping is unavailable or invalid; file data not recovered");
+            img.complete = false;
+            return None;
+        }
     } else {
         // Classic indirect block pointers.
         let per = (sb.block_size / 4).max(1);
@@ -154,44 +159,51 @@ fn read_indirect(data: &[u8], sb: &Sb, block: u64, level: u8, per: u64, logical:
     Ok(())
 }
 
-fn extents(data: &[u8], sb: &Sb, node_off: usize, map: &mut Vec<Option<u64>>, depth_guard: u8, img: &mut FsImage) {
-    if depth_guard > 8 {
-        return;
+/// Read a complete extent node. Child depths decrease exactly once per level, and the whole
+/// traversal shares a work budget; damaged metadata must never turn into invented sparse bytes.
+fn extents(data: &[u8], sb: &Sb, node_off: usize, map: &mut [Option<u64>], expected_depth: Option<u16>, remaining: &mut usize) -> Option<()> {
+    *remaining = remaining.checked_sub(1)?;
+    let length = if expected_depth.is_none() { 60 } else { usize::try_from(sb.block_size).ok()? };
+    let node = data.get(node_off..node_off.checked_add(length)?)?;
+    let r = Reader::new(node);
+    if r.u16_le(0)? != 0xf30a {
+        return None;
     }
-    let r = Reader::new(data);
-    if r.u16_le(node_off) != Some(0xf30a) {
-        img.warn("ext4: bad extent header");
-        img.complete = false;
-        return;
+    let entries = usize::from(r.u16_le(2)?);
+    let maximum = usize::from(r.u16_le(4)?);
+    let depth = r.u16_le(6)?;
+    if entries > maximum || maximum > length.saturating_sub(12) / 12 || depth > 8 || expected_depth.is_some_and(|want| want != depth) {
+        return None;
     }
-    let entries = r.u16_le(node_off + 2).unwrap_or(0).min(340);
-    let depth = r.u16_le(node_off + 6).unwrap_or(0);
-    for i in 0..entries as usize {
-        let e = node_off + 12 + i * 12;
+    for i in 0..entries {
+        *remaining = remaining.checked_sub(1)?;
+        let entry = 12 + i * 12;
         if depth == 0 {
-            let logical = r.u32_le(e).unwrap_or(0);
-            let raw_len = r.u16_le(e + 4).unwrap_or(0);
-            let start_hi = r.u16_le(e + 6).unwrap_or(0);
-            let start_lo = r.u32_le(e + 8).unwrap_or(0);
-            let phys = u64::from(start_lo) | (u64::from(start_hi) << 32);
-            let unwritten = raw_len > 32768; // uninitialised extents
-            let len = if unwritten { raw_len - 32768 } else { raw_len };
-            for k in 0..u64::from(len) {
-                if let Ok(idx) = usize::try_from(u64::from(logical).saturating_add(k))
-                    && idx < map.len()
-                {
-                    map[idx] = if unwritten { None } else { Some(phys.saturating_add(k)) };
-                }
+            let logical = u64::from(r.u32_le(entry)?);
+            let raw_len = r.u16_le(entry + 4)?;
+            let start_hi = r.u16_le(entry + 6)?;
+            let start_lo = r.u32_le(entry + 8)?;
+            let physical = u64::from(start_lo) | (u64::from(start_hi) << 32);
+            let unwritten = raw_len > 32768;
+            let count = if unwritten { raw_len - 32768 } else { raw_len };
+            if count == 0 {
+                return None;
+            }
+            let end = logical.checked_add(u64::from(count))?.min(map.len() as u64);
+            for block in logical..end {
+                *remaining = remaining.checked_sub(1)?;
+                let slot = map.get_mut(usize::try_from(block).ok()?)?;
+                *slot = if unwritten { None } else { Some(physical.checked_add(block - logical)?) };
             }
         } else {
-            let leaf_lo = r.u32_le(e + 4).unwrap_or(0);
-            let leaf_hi = r.u16_le(e + 8).unwrap_or(0);
-            let leaf = u64::from(leaf_lo) | (u64::from(leaf_hi) << 32);
-            if let Some(off) = usize::try_from(leaf.saturating_mul(sb.block_size)).ok().filter(|&o| o + 12 <= data.len()) {
-                extents(data, sb, off, map, depth_guard + 1, img);
-            }
+            let child_lo = r.u32_le(entry + 4)?;
+            let child_hi = r.u16_le(entry + 8)?;
+            let child = u64::from(child_lo) | (u64::from(child_hi) << 32);
+            let offset = usize::try_from(child.checked_mul(sb.block_size)?).ok()?;
+            extents(data, sb, offset, map, Some(depth - 1), remaining)?;
         }
     }
+    Some(())
 }
 
 fn file_data(data: &[u8], sb: &Sb, inode_off: u64, flags: u32, size: u64, limits: &Limits, img: &mut FsImage) -> Option<Vec<u8>> {

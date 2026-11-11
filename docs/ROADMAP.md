@@ -2156,6 +2156,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-firmware-zip-output-budget-20261110
 - [x] Skip inconsistent JFFS2 data nodes and recover files when later valid nodes cover their damaged extents within the final file size.
       — claimed: Afloat16, branch bugfix/r3.12-jffs2-decoded-node-lengths-20261111
+- [x] Require complete, structurally consistent extent nodes and child depths before returning a file mapping; missing or invalid metadata leaves the file unrecovered instead of replacing unknown ranges with zeros.
+      — claimed: Afloat16, branch bugfix/r3.12-ext4-unavailable-extent-map-20261110
 - [x] Bound filesystem and archive recovery by the recorded image, node, directory and member limits.
       — claimed: Afloat16, branch bugfix/r3.12-filesystem-archive-bounds
 - [x] Use the version-two cramfs size to bound root, directory and data reads in either byte order while preserving version-one compatibility.
