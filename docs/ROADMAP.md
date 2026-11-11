@@ -2010,6 +2010,10 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-elf-version-section-bounds-20261109
 - [x] Keep PE optional-header reads within the declared header.
       — claimed: Afloat16, branch bugfix/r3.12-pe-optional-header-framing-20261105
+- [x] Bound import descriptor walks by mapped file bytes and report incomplete metadata. Normal imports keep
+      following the terminator when their declared size is short or zero; delay-load and bound metadata
+      also respect their directory sizes. Preserve the shared retained-text budget.
+      — claimed: Afloat16, branch bugfix/r3.12-pe-import-directory-bounds-20261109
 - [x] Use the PE image's declared header extent when an RVA is not mapped by a section.
       — claimed: Afloat16, branch bugfix/r3.12-pe-header-rva-span
 - [x] Keep PE entry points, import slots and exception function starts from wrapping image-base arithmetic into unrelated addresses.
