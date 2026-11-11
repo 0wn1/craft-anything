@@ -68,11 +68,11 @@ pub fn uid_of(v: &Value) -> Option<u64> {
     }
 }
 
-fn kind_of(v: &Value) -> &'static str {
+fn kind_of(v: &Value, index: usize) -> &'static str {
     match v {
         Value::Dict(_) => "object",
         Value::Array(_) => "array",
-        Value::String(s) if s == "$null" => "null",
+        Value::String(s) if index == 0 && s == "$null" => "null",
         Value::String(_) => "string",
         Value::Integer(_) => "integer",
         Value::Real(_) => "real",
@@ -120,7 +120,7 @@ impl KeyedArchive {
                     Value::Dict(d) if uid_of(o).is_none() => d.iter().map(|(k, _)| k.clone()).collect(),
                     _ => Vec::new(),
                 };
-                let kind = if uid_of(o).is_some() { "uid" } else { kind_of(o) };
+                let kind = if uid_of(o).is_some() { "uid" } else { kind_of(o, i) };
                 ObjectRow { index: i, class: self.class_of(i as u64), kind, keys, references }
             })
             .collect()
@@ -208,7 +208,7 @@ impl Projector<'_> {
             return json!({"$ref": idx, "$note": "missing object"});
         };
         match obj {
-            Value::String(s) if s == "$null" => return Json::Null,
+            Value::String(s) if idx == 0 && s == "$null" => return Json::Null,
             Value::Dict(_) | Value::Array(_) | Value::Uid(_) => {}
             other => {
                 let copied = match other {
