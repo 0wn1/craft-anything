@@ -1552,6 +1552,8 @@ Owner: open · Status: in progress
       which Windows counts without the certificate table), the tool no longer warns that a gap
       could read as different, and a regression puts a gap between sections
       — claimed: muraa-p, branch bugfix/r3.11-publisher-hash-sections
+- [x] Preserve source registers and link-register writes for AArch64 returns and authenticated control transfers.
+      — claimed: Afloat16, branch bugfix/r3.11-a64-control-registers-20261110
 - [x] Enforce stand-in per-body and total byte budgets on the text that is actually retained after redaction;
       deduplicate consecutive samples before charging the capture budget.
       — claimed: Afloat16, branch bugfix/r3.11-standin-redacted-budget-20261103b
