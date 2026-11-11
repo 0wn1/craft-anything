@@ -2172,6 +2172,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-filesystem-page-visits-20261110
 - [x] Read ROMFS names at the configured name-length limit.
       — claimed: Plastic-time, branch rrfz/bugfix-r3.12-romfs-name-20261110
+- [x] Read regular ext4 inline files up to the 60-byte inode payload while preserving byte budgets; unsupported inline continuations and directory layouts remain explicitly unrecovered.
+      — claimed: Afloat16, branch feature/r3.12-ext4-small-inline-files-20261110
 - [x] Read big-endian cramfs inode fields and block pointers so files and links recover like little-endian images.
       — claimed: Afloat16, branch bugfix/r3.12-cramfs-big-endian-20261110
 - [x] Verify gzip FHCRC and accept informational XFL and OS bytes without inventing reserved-value restrictions.

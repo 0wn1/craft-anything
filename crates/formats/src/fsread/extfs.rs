@@ -1,9 +1,9 @@
 //! A minimal read-only ext2/3/4 reader: the superblock, block-group descriptors (32- or 64-byte),
 //! inodes, directory entries, and regular-file data via either classic block pointers
 //! (direct/indirect/double-indirect) or ext4 extent trees (depth 0 and 1). It extracts regular
-//! files, directories and fast symlinks from the root inode down, strictly bounded.
+//! files (including small ext4 inline files), directories and fast symlinks from the root inode down, strictly bounded.
 //!
-//! Deliberately NOT handled (reported in warnings): triple-indirect blocks, inline data, directory
+//! Deliberately NOT handled (reported in warnings): triple-indirect blocks, larger inline files and inline directories, directory
 //! HTree index specifics (directories are read as linear entry lists, which is layout-compatible),
 //! encryption, and 64-bit block numbers beyond the low 32 bits. These make a file appear as
 //! unrecovered rather than producing wrong bytes.
@@ -41,7 +41,7 @@ fn superblock(data: &[u8]) -> Option<Sb> {
     if inodes_per_group == 0 || inode_size < 128 {
         return None;
     }
-    let kind = if incompat & (0x40 | 0x80 | 0x200) != 0 {
+    let kind = if incompat & (0x40 | 0x80 | 0x200 | 0x8000) != 0 {
         "ext4"
     } else if compat & 0x4 != 0 {
         "ext3"
@@ -215,6 +215,18 @@ fn file_data(data: &[u8], sb: &Sb, inode_off: u64, flags: u32, size: u64, limits
         img.complete = false;
         return None;
     }
+    if flags & 0x1000_0000 != 0 {
+        if sb.incompat & 0x8000 == 0 || size > 60 {
+            img.warn("ext4: inline file needs unsupported metadata; file data not recovered");
+            img.complete = false;
+            return None;
+        }
+        let start = usize::try_from(inode_off).ok()?.checked_add(40)?;
+        let end = start.checked_add(usize::try_from(size).ok()?)?;
+        let bytes = data.get(start..end)?.to_vec();
+        img.bytes = img.bytes.saturating_add(size);
+        return Some(bytes);
+    }
     let nblocks = size.div_ceil(sb.block_size);
     let map = file_block_map(data, sb, inode_off, flags, nblocks, img)?;
     let mut out = Vec::with_capacity(usize::try_from(size).unwrap_or(0));
@@ -252,8 +264,9 @@ fn walk(data: &[u8], sb: &Sb, ino: u32, parent: &str, limits: &Limits, img: &mut
     let size = u64::from(r.u32_le(io + 4).unwrap_or(0)) | (u64::from(r.u32_le(io + 108).unwrap_or(0)) << 32);
     let flags = r.u32_le(io + 32).unwrap_or(0);
     if flags & 0x1000_0000 != 0 {
-        img.warn(format!("{parent}: inline-data inode not read"));
+        img.warn(format!("{parent}: inline directory not read"));
         img.complete = false;
+        return;
     }
     // Read the directory's data (a run of entry blocks) and parse entries.
     let dir_bytes = file_data(data, sb, inode_off, flags, size, &Limits { max_file_bytes: 64 << 20, ..*limits }, img).unwrap_or_default();
