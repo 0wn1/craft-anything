@@ -1567,6 +1567,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.11-standin-redacted-budget-20261103b
       Revision `d601bc4e` passed [full Linux CI](https://github.com/storytold/craft-anything/actions/runs/41788735130):
       all four retained-budget regressions and six deduplication regressions passed.
+- [x] Preserve every observation when comparing evidence bundles, including repeated operation/subject records and identical-record multiplicity.
+      — claimed: Afloat16, branch bugfix/r3.11-bundle-record-multiplicity-20261110
 - [x] Read only regular files for binary, text and evidence-bundle inputs, enforce whole-file byte caps while reading, and hash prefixes only after EOF instead of trusting a prior size report.
       — claimed: Afloat16, branch bugfix/r3.11-bounded-file-inputs-20261110
 - [x] A text source (a script, Markdown) had no tool that reads it as text outside a build (#539):
