@@ -285,10 +285,16 @@ fn file_bytes(data: &[u8], sb: &Sb, idata: &[u8], pos: usize, limits: &Limits, i
     }
     let bs = u64::from(sb.block_size);
     let has_fragment = fragment != 0xffff_ffff;
-    let full_blocks = if has_fragment { (file_size / bs) as usize } else { file_size.div_ceil(bs.max(1)) as usize };
+    let full_blocks = if has_fragment { file_size / bs } else { file_size.div_ceil(bs) };
+    if full_blocks > 1 << 20 {
+        img.warn("squashfs: file block count exceeds recovery limit");
+        img.complete = false;
+        return None;
+    }
     let mut out = Vec::with_capacity(usize::try_from(file_size).unwrap_or(0));
     let mut data_pos = blocks_start;
-    for i in 0..full_blocks.min(1 << 20) {
+    for i in 0..usize::try_from(full_blocks).ok()? {
+        let expected = usize::try_from(file_size.saturating_sub(i as u64 * bs).min(bs)).ok()?;
         let Some(bsize) = r.u32_le(list_off + i * 4) else {
             img.warn("squashfs: file block list not read");
             img.complete = false;
@@ -298,7 +304,7 @@ fn file_bytes(data: &[u8], sb: &Sb, idata: &[u8], pos: usize, limits: &Limits, i
         let len = (bsize & 0x00ff_ffff) as usize;
         if len == 0 {
             // Sparse block.
-            out.resize(out.len().saturating_add(sb.block_size as usize), 0);
+            out.resize(out.len().saturating_add(expected), 0);
             continue;
         }
         let Some(block) = usize::try_from(data_pos).ok().and_then(|start| Reader::new(data).slice(start, len)) else {
@@ -307,12 +313,17 @@ fn file_bytes(data: &[u8], sb: &Sb, idata: &[u8], pos: usize, limits: &Limits, i
             return None;
         };
         if uncompressed {
+            if block.len() != expected {
+                img.warn("squashfs: data block length does not match its logical file span");
+                img.complete = false;
+                return None;
+            }
             out.extend_from_slice(block);
         } else {
-            match decompress(sb.compression, block, bs) {
-                Some(d) => out.extend_from_slice(&d),
-                None => {
-                    img.warn("squashfs: a data block did not decompress");
+            match decompress(sb.compression, block, expected as u64) {
+                Some(d) if d.len() == expected => out.extend_from_slice(&d),
+                _ => {
+                    img.warn("squashfs: data block did not decode to its logical file span");
                     img.complete = false;
                     return None;
                 }

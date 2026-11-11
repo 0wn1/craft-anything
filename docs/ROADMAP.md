@@ -2146,6 +2146,8 @@ Owner: open · Status: in progress
       (#606–#615, by Afloat16)
 - [x] Report truncated SquashFS metadata blocks and retain previously recovered blocks.
       — claimed: Afloat16, branch bugfix/r3.12-squashfs-metadata-warning
+- [x] Require each raw or decoded file block to cover exactly its logical range, including the partial final block, so short blocks cannot shift later contents and long blocks cannot be hidden by truncation.
+      — claimed: Afloat16, branch bugfix/r3.12-squashfs-block-output-size-20261110
 - [x] Recover zero-filled cramfs hole blocks at full and partial page boundaries while retaining the existing recovery budgets.
       — claimed: Afloat16, branch bugfix/r3.12-cramfs-hole-blocks-20261110
 - [x] Charge firmware ZIP outputs before decoding the next member, so byte and file limits bound retained member data.
