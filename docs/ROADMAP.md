@@ -2381,6 +2381,8 @@ Owner: open · Status: in progress
 
 - [x] Require complete sBPF symbol records and their declared string-table links before reporting symbol identities.
       — claimed: Afloat16, branch bugfix/r3.12-sbpf-symbol-framing-20261110
+- [x] Keep the sBPF symbol and relocation output limits global across repeated ELF tables.
+      — claimed: Afloat16, branch bugfix/r3.12-sbpf-table-records
 - [x] Bound retained PE import/export name and forwarder bytes across repeated references; preserve bounded prefixes and report byte-budget truncation.
 
 
