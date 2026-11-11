@@ -1534,6 +1534,8 @@ Owner: open · Status: in progress
       (`pyinstaller_pyz`), listing the program's modules and handing one back as a `.pyc`; a
       Python zip application named `.pyz` stays with the ZIP reader
       — claimed: muraa-p, branch feature/r3.11-standalone-pyz
+- [x] Collect native function evidence from every body block and infer parameters from its actual entry block.
+      — claimed: Afloat16, branch bugfix/r3.11-native-function-block-evidence-20261110
 - [ ] `native_source_folder_write` uses the built-in decompiler only: use Ghidra in Deep mode when
       it's there
 - [x] Keep source registers alive when an AArch64 arithmetic result is discarded into the zero register.
