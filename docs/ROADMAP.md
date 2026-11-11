@@ -1493,6 +1493,8 @@ Owner: open · Status: in progress
       Source `75b507c0b96f`; [format checks](https://github.com/Afloat16/claude-mem/actions/runs/42634877637/job/129220281335) and [compatibility gates](https://github.com/Afloat16/claude-mem/actions/runs/42642583301/job/129247271153) passed.
 - [ ] Unreal: sounds and meshes out (so a Deep-mode rebuild needs no outside converter for them)
 
+- [x] Decode Unity EAC single-channel and dual-channel textures through the bounded picture exporter.
+      — claimed: Afloat16, branch feature/r3.9-unity-eac-textures-20261111
 - [x] Decode Unity ETC1 RGB textures through the bounded picture exporter, including both block modes and clipped edges.
       — claimed: Afloat16, branch feature/r3.9-etc1-textures-20261110
 - [x] Decode Unreal DXT3 (BC2) texture blocks, including explicit alpha and clipped edge blocks.
