@@ -2133,6 +2133,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-index-map-boundaries
 - [x] Preserve the URL delimiter in source-map roots when resolving a relative source file.
       — claimed: Afloat16, branch bugfix/r3.12-source-map-url-root
+- [x] Apply a nonempty source-map root prefix before interpreting a source path, including leading slashes and URL-shaped sources, while preserving empty-root compatibility.
+      — claimed: Afloat16, branch bugfix/r3.12-source-root-prefix-20261111
 - [x] Keep source map annotation URL suffixes intact.
       — claimed: Plastic-time, branch rrfz/bugfix-r3.12-annotation-20261110
 - [x] Keep DOS relocations inside the declared executable header.
