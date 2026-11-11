@@ -2117,6 +2117,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-cil-branch-target-ranges-20261111
 - [x] Validate CIL method exception-section kinds, extents and complete clause records before reading exception handlers.
       — claimed: Afloat16, branch bugfix/r3.12-cil-exception-framing-20261110
+- [x] Preserve distinct nonfinite floating-point constants when hashing normalized CIL instructions instead of collapsing them to JSON null, retaining original single-precision NaN bits before widening.
+      — claimed: Afloat16, branch bugfix/r3.12-cil-nonfinite-hashes-20261110
 - [x] Read Dart version hashes and feature strings only from the bytes belonging to that snapshot.
       — claimed: Afloat16, branch bugfix/r3.12-dart-snapshot-extent
 - [x] Keep Dart string-pool duplicate tracking within the retained URI and token limits.
