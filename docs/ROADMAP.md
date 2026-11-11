@@ -1563,6 +1563,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.11-standin-redacted-budget-20261103b
       Revision `d601bc4e` passed [full Linux CI](https://github.com/storytold/craft-anything/actions/runs/41788735130):
       all four retained-budget regressions and six deduplication regressions passed.
+- [x] Read only regular files for binary, text and evidence-bundle inputs, enforce whole-file byte caps while reading, and hash prefixes only after EOF instead of trusting a prior size report.
+      — claimed: Afloat16, branch bugfix/r3.11-bounded-file-inputs-20261110
 - [x] A text source (a script, Markdown) had no tool that reads it as text outside a build (#539):
       `build_file_read` works only while a project is being built, and the native tools stop at
       "Unknown file magic", while triage pointed to `native_bytes_show`, whose error points back
