@@ -2899,9 +2899,9 @@ Owner: open · Status: in progress
       template only real calendar dates in API paths (#602–#605, by Afloat16)
 - [x] Preserve empty query pairs when matching older stand-in recordings, without treating raw
       query separators as pairs — claimed: Afloat16, branch `bugfix/r3.13-preserve-empty-query-pairs-20261103`
-- [ ] `web_page_show` outlines JSON bodies only for the first 200 requests of its window and says
-      nothing about the rest (#1811): count the cap against JSON responses, and report how many got
-      no outline (and how many bodies a walkthrough's `keep_bodies` left out).
+- [x] A walkthrough's `keep_bodies` keeps response bodies only for the first 200 requests and says
+      nothing about the rest (#1811; `web_page_show`'s outlines were fixed in #1845): count the kept
+      bodies and say how many were left out and why.
       — claimed: htcom-code, branch bugfix/r3.13-body-outline-cap
 
 ---
