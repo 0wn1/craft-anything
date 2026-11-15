@@ -451,11 +451,14 @@ pub fn parse_xml(data: &[u8]) -> Result<Value, FormatError> {
         // shared reader also charges decoded leaf/key text against this budget.
         max_expanded_bytes: MAX_EXPANDED_BYTES.max(data.len().saturating_mul(3)),
     };
-    craft_plist::parse_xml_with_limits(data, limits).map(xml_value).map_err(|error| match error {
-        craft_plist::FormatError::Malformed(message) => FormatError::Malformed(message),
-        craft_plist::FormatError::Truncated(message) => FormatError::Truncated(message),
-        craft_plist::FormatError::Unsupported(message) => FormatError::Unsupported(message),
-        craft_plist::FormatError::TooLarge(message) => FormatError::TooLarge(message),
+    // The old tokenizer could append at most two tokens after its MAX_NODES check.
+    craft_plist::parse_xml_with_token_limit(data, limits, craft_plist::XmlOptions::default(), MAX_NODES.saturating_add(2)).map(xml_value).map_err(|error| {
+        match error {
+            craft_plist::FormatError::Malformed(message) => FormatError::Malformed(message),
+            craft_plist::FormatError::Truncated(message) => FormatError::Truncated(message),
+            craft_plist::FormatError::Unsupported(message) => FormatError::Unsupported(message),
+            craft_plist::FormatError::TooLarge(message) => FormatError::TooLarge(message),
+        }
     })
 }
 
