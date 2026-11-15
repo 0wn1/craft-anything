@@ -2418,7 +2418,7 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-xml-plist-document
 - [x] Normalize literal XML line endings before decoding plist text, keeping character references intact.
       — claimed: Plastic-time, branch bugfix/r3.12-plist-xml-line-endings-1111
-- [ ] Count every JavaScript line terminator in fact locations.
+- [x] Count every JavaScript line terminator in fact locations.
       — claimed: Plastic-time, branch bugfix/r3.12-js-line-index-1115
 - [x] End JavaScript line comments at every language line terminator, preserving following tokens for the nesting admission guard and lexer fallback.
       — claimed: Afloat16, branch bugfix/r3.12-js-line-comment-boundaries
