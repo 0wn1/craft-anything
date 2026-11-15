@@ -100,20 +100,9 @@ pub fn pe_is_managed(data: &[u8]) -> bool {
     matches!((r.u32_le(entry), r.u32_le(entry + 4)), (Some(rva), Some(size)) if rva != 0 && size != 0)
 }
 
-/// True when a ZIP's central directory names `entry` (cheap scan, no decompression).
+/// True when the ZIP's own central directory names `entry`, without decompressing members.
 pub fn zip_has_entry(data: &[u8], entry: &str) -> bool {
-    let needle = entry.as_bytes();
-    // Central directory headers: PK\x01\x02 … name at +46, name length at +28.
-    let mut i = 0usize;
-    while let Some(pos) = data.get(i..).and_then(|rest| rest.windows(4).position(|w| w == b"PK\x01\x02")) {
-        let at = i + pos;
-        let r = Reader::new(data);
-        if r.u16_le(at + 28).and_then(|n| r.slice(at + 46, usize::from(n))) == Some(needle) {
-            return true;
-        }
-        i = at + 4;
-    }
-    false
+    zip::has_entry(data, entry)
 }
 
 /// The ASAR reader's own check, so format dispatch and the reader agree on what an ASAR is.
