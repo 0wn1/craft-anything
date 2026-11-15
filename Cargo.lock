@@ -1337,6 +1337,7 @@ version = "0.6.1"
 dependencies = [
  "bzip2-rs",
  "craft-anything-testkit",
+ "craft-plist",
  "lzma-rs",
  "miniz_oxide 0.8.9",
  "object 0.36.7",
@@ -1482,6 +1483,14 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "craft-plist"
+version = "0.1.0"
+source = "git+https://github.com/storytold/craft-libs?rev=0dab3133a2a58d321ade446f23592e7855b79e78#0dab3133a2a58d321ade446f23592e7855b79e78"
+dependencies = [
+ "thiserror 2.0.21",
 ]
 
 [[package]]
