@@ -2946,6 +2946,8 @@ Owner: open · Status: in progress
 - [x] Refuse padded and unterminated subidentifiers and cut-off arc lists in code-signature requirement OIDs instead of showing a different OID, and split a long first subidentifier.
       — claimed: NicolasBohn, branch bugfix/r3.12-codesign-oid-subidentifiers
 
+- [x] Require call syntax for tRPC client hooks in JavaScript lexer fallback facts.
+      — claimed: Plastic-time, branch bugfix/r3.12-trpc-calls-1116
 - [x] Keep side-effect imports in JavaScript lexer fallback facts.
       — claimed: Plastic-time, branch bugfix/r3.12-js-side-effect-imports-1115
 - [x] Bound the JavaScript lexer fallback's `endpoints` (fetch calls and URL literals) and
