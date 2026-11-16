@@ -1672,6 +1672,11 @@ Gaps found while using the app for real projects.
 - [x] `build_files_list` lists an edited-in-place project from the project folder itself, not a
       missing or nested `app/`, and leaves Craft Anything's own records out
       — claimed: AlexJoaquimPereira, branch `bugfix/r2.9-build-files-in-place`; commit 1ffeb40
+- [ ] `build_file_read` reads the whole project file into memory before paging, so a large
+      generated file under `app/` can freeze or kill the app; cap the input and return a plain
+      error for a file over the cap
+      — claimed: AlexJoaquimPereira, branch bugfix/r2.9-build-file-read-cap
+- [ ] `build_file_edit` also reads the whole file into memory; cap it the same way
 - [x] Choose Claude Code's folder (`CLAUDE_CONFIG_DIR`) per AI, so one computer can build with
       two Claude accounts; an app opened from the Dock never sees the shell's variable. Settings →
       AI (a typed folder, and Add another) and `ai folder`; live-checked from the CLI with an empty
