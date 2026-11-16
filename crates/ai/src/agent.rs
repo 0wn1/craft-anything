@@ -286,16 +286,16 @@ impl Default for LoopConfig {
     }
 }
 
-/// A log of a model turn that stopped, beside the agent CLIs' failure logs: the backend, what the
-/// server said and what to do about it. `None` when nothing could be written; the error itself is
-/// still shown.
+/// A log of a model turn that stopped, beside the agent CLIs' failure logs: the backend, what
+/// [`logged_error`] keeps of the error and what to do about it. `None` when nothing could be
+/// written; the error itself is still shown.
 fn write_failure_log(dir: &std::path::Path, backend: &str, e: &ToolError) -> Option<std::path::PathBuf> {
     let report = crate::failure_log::Report {
         what: format!("{backend}: a model turn stopped"),
         command: "the model request: no program ran".into(),
         check: format!("craft-anything-cli ai test {backend:?}"),
         diagnosis: e.remediation.clone(),
-        error: Some(format!("{} ({:?})", e.message, e.code)),
+        error: Some(logged_error(e)),
         ..Default::default()
     };
     match crate::failure_log::write(dir, &report) {
@@ -305,6 +305,34 @@ fn write_failure_log(dir: &std::path::Path, backend: &str, e: &ToolError) -> Opt
             None
         }
     }
+}
+
+/// What a failure log keeps of an API error: Craft Anything's code for it, the HTTP status, the
+/// service's error code when it is a known one ([`crate::failure::KNOWN_PROVIDER_ERRORS`], written
+/// from that list), and the context window and request size the service gave. The service's
+/// message is left out, and so is a code that isn't known: a service, or a proxy in front of it,
+/// can repeat the key or words from the request in either. The person saw the message with the
+/// error.
+fn logged_error(e: &ToolError) -> String {
+    let field = |k: &str| e.details.as_ref().and_then(|d| d.get(k));
+    let number = |k: &str| field(k).and_then(Value::as_u64);
+    let mut s = format!("{:?} (the service's message is left out)", e.code);
+    if let Some(status) = number("status") {
+        s.push_str(&format!("\nHTTP status: {status}"));
+    }
+    if let Some(sent) = field("provider_error").and_then(Value::as_str) {
+        match crate::failure::KNOWN_PROVIDER_ERRORS.iter().find(|known| **known == sent) {
+            Some(known) => s.push_str(&format!("\nThe service's error code: {known}")),
+            None => s.push_str("\nThe service's error code: not a known one, so it is left out"),
+        }
+    }
+    if let Some(window) = number("context_window") {
+        s.push_str(&format!("\nContext window: {window} tokens"));
+    }
+    if let Some(tokens) = number("prompt_tokens") {
+        s.push_str(&format!("\nThe request: {tokens} tokens"));
+    }
+    s
 }
 
 /// The Core tools a builder on a local model keeps. The Core set is 25-odd tools for studying a
@@ -808,8 +836,8 @@ impl AgentLoop {
                         continue;
                     }
                     *self.failure.lock().unwrap_or_else(PoisonError::into_inner) = Some(TurnFailure::from_api(&e));
-                    // The agent CLIs write a log of a failed run; an API backend does the same, so the
-                    // server's own words can be read afterwards.
+                    // The agent CLIs write a log of a failed run; an API backend does the same, with
+                    // what `logged_error` keeps of the error.
                     let log = self.cfg.logs.clone().and_then(|dir| write_failure_log(&dir, &name, &e));
                     self.emit(AgentEvent::Error { message: format!("{name}: {}", e.message), remediation: e.remediation, log });
                     return None;
@@ -1696,7 +1724,8 @@ pub(crate) mod tests {
         }
     }
 
-    /// A failing backend says where its log is, and the log holds the server's words.
+    /// A failing backend says where its log is, and the log holds the HTTP status without the
+    /// server's words.
     #[test]
     fn a_failing_backend_writes_a_log_and_says_where_it_is() {
         let dir = tempfile::tempdir().unwrap();
@@ -1724,20 +1753,22 @@ pub(crate) mod tests {
             .expect("the error names its log");
         assert!(log.starts_with(&logs), "{log:?}");
         let text = std::fs::read_to_string(&log).unwrap();
-        assert!(text.contains("Local: a model turn stopped") && text.contains("503"), "{text}");
+        assert!(text.contains("Local: a model turn stopped") && text.contains("HTTP status: 503"), "{text}");
+        assert!(!text.contains("busy"), "{text}");
     }
 
     /// The agent CLIs write a log of a failed run; a model turn that stopped on an API backend
-    /// does the same, with the server's words and the fix.
+    /// does the same, with the error's code and the fix, and without the server's words.
     #[test]
     fn a_stopped_model_turn_writes_a_failure_log() {
         let dir = tempfile::tempdir().unwrap();
         let e = ToolError::new(ErrorCode::ProgramFailed, "the server said 503").with_remediation("Try again later.");
         let path = write_failure_log(dir.path(), "Local", &e).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
-        for part in ["Local: a model turn stopped", "the server said 503", "Try again later.", "ai test"] {
+        for part in ["Local: a model turn stopped", "ProgramFailed", "Try again later.", "ai test"] {
             assert!(text.contains(part), "{part}: {text}");
         }
+        assert!(!text.contains("the server said"), "{text}");
         // Nothing set: no log, and the error still reaches the person.
         assert!(LoopConfig::default().logs.is_none());
     }

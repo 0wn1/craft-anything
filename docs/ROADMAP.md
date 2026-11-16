@@ -654,6 +654,12 @@ Owner: open · Status: todo
 - [x] Review of #1921: a key in a plugin's arguments (`?token=…`) is hidden in its log, a server that
       stops answering is stopped and its error and log keep what it printed, and a failed write waits
       a moment for the exit. The wait after a failed write has no test of its own (it's a race)
+- [x] An API backend's failure log leaves out what the service said: `write_failure_log` wrote
+      the error's message, where a service or a proxy in front of it can repeat the key or words
+      from the request (raised in review of #1049). It keeps Craft Anything's code, the HTTP
+      status, the context window and request size, and the service's error code only when it is
+      one of `failure::KNOWN_PROVIDER_ERRORS`
+      — claimed: scks1, branch bugfix/r5.5-api-failure-log-service-text
 - [x] Settings → AI can replace or forget an API backend's saved key, so a key rotated in the
       environment isn't hidden behind an older saved one (#1358); `ai key <name>` shows, replaces
       or forgets it headlessly, and never prints it
