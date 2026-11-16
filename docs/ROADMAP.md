@@ -789,6 +789,7 @@ yet, and the quick start is how every new person begins.
       program is about to start or be checked, keeping frequent reads on the files (PR #1942's
       author offered this follow-up). The fix above reads the project/ancestor `.cargo` files and
       `CARGO_TARGET_DIR`.
+      — claimed: Fadlalla-ai, branch fix/cargo-target-dir-at-start
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
       2.1.179 and a current version. Windows passed; the Mac CLI was only checked to contain the
