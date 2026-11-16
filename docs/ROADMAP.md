@@ -2495,6 +2495,8 @@ Owner: open · Status: in progress
       — claimed: Plastic-time, branch bugfix/r3.12-plist-xml-line-endings-1111
 - [x] Count every JavaScript line terminator in fact locations.
       — claimed: Plastic-time, branch bugfix/r3.12-js-line-index-1115
+- [ ] Decode legacy octal escapes, Unicode line continuations and zero-padded braced Unicode escapes in JavaScript strings.
+      — claimed: Plastic-time, branch bugfix/r3.12-string-escapes-1116
 - [x] End JavaScript line comments at every language line terminator, preserving following tokens for the nesting admission guard and lexer fallback.
       — claimed: Afloat16, branch bugfix/r3.12-js-line-comment-boundaries
 - [x] Count call, index and tagged-template chains and consecutive labels in the JavaScript nesting estimate, so sources nested deeper than the parser's stack go to the lexer fallback instead of overflowing it.
