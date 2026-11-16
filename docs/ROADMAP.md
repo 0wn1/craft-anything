@@ -759,7 +759,9 @@ yet, and the quick start is how every new person begins.
 - [x] A Ghidra with no decompiler program for this computer (public downloads leave out macOS) is
       refused before the long analysis, with the command that builds it; checked on a real Mac
 - [ ] `engines_install` builds Ghidra's native programs on macOS, so a Mac install works unaided
-- [ ] Follow the README quick start on a clean machine (Windows, and Linux or macOS)
+- [ ] Follow the README quick start on a clean machine (Windows)
+- [ ] Follow the README quick start on a clean machine (Linux)
+      — claimed: Fadlalla-ai, branch test/r5.7-linux-quick-start
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
       2.1.179 and a current version. Windows passed; the Mac CLI was only checked to contain the
