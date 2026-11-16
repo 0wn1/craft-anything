@@ -760,7 +760,9 @@ yet, and the quick start is how every new person begins.
       refused before the long analysis, with the command that builds it; checked on a real Mac
 - [ ] `engines_install` builds Ghidra's native programs on macOS, so a Mac install works unaided
 - [ ] Follow the README quick start on a clean machine (Windows)
-- [ ] Follow the README quick start on a clean machine (Linux)
+- [x] Follow the README quick start on a clean machine (Linux): clean Ubuntu 24.04 and Debian 13
+      needed `build-essential`, now in the README's package line; then the app and CLI built and
+      `doctor` was healthy (STATUS.md, "Linux quick start")
       — claimed: Fadlalla-ai, branch test/r5.7-linux-quick-start
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with

@@ -578,6 +578,22 @@ runs' texts, an HTTP/SSE stand-in where the model calls a missing tool, is told,
 and answers, and two mutations (the reader off, names not de-duplicated) that the tests caught.
 Not yet run live after the change. Hermes-style `<tool_call>{json}</tool_call>` is still text.
 
+### Linux quick start (R5.7)
+
+README's "Get started" was followed word for word on clean Ubuntu 24.04 and Debian 13 containers
+(2026-11-16, `main` at `9460af21`, Rust 1.100.0 from rustup, x86-64): the README's packages,
+`git clone`, `cargo run --release -p craft-anything`, `cargo install --path apps/craft-anything-cli`
+and `craft-anything-cli doctor`. With only the packages the README listed, every build stopped at
+once on both with "linker `cc` not found": a clean system has no C compiler, which Rust needs to
+link. The package line now starts with `build-essential`. With it, the desktop app built in about
+4 minutes on each, the CLI installed, and `doctor` reported healthy (the MCP self-test listed 30
+tools; every optional engine but `objdump` absent, as expected). In a container the app has no
+screen, so `cargo run` stopped with winit's "neither WAYLAND_DISPLAY nor WAYLAND_SOCKET nor DISPLAY
+is set." On a Debian 13 desktop (GNOME on X11, NVIDIA RTX 3060, driver 550.163.01; not a clean
+machine) the release build opened its window, drawing with Vulkan on the NVIDIA card.
+Not checked: Fedora or another distribution, Wayland, the app beyond opening its window, and a
+build through a coding agent.
+
 ### Linux graphics card choice
 
 On Linux the desktop app draws on the GPU that drives the screen (#571), read from the connected
