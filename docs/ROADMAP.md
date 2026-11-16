@@ -783,10 +783,13 @@ yet, and the quick start is how every new person begins.
       — claimed: Fadlalla-ai, branch bugfix/r5.7-managed-java-found
 - [ ] A Java set for Ghidra (Settings → Engines, `engines.ghidra.java_home`) isn't used as the Java
       runtime either, so Vineflower still says Java isn't installed with only that set
-- [ ] JADX doesn't use the Java runtime engine (the Java Ghidra's setup brings, or a Java path set in
+- [x] JADX doesn't use the Java runtime engine (the Java Ghidra's setup brings, or a Java path set in
       Settings → Engines): its launcher script finds Java only through `JAVA_HOME` or PATH, and
       neither is passed, so with no system Java, Java source of an Android class fails although
-      `engines_list` and `doctor` say the Java runtime runs JADX
+      `engines_list` and `doctor` say the Java runtime runs JADX. That Java is now passed as
+      `JAVA_HOME` when `<home>/bin/java` is there. Live in Debian 13 with no system Java, after
+      Ghidra's setup's Java and `engines_install jadx`: Java source of a class came back (before:
+      JADX exited 1)
       — claimed: Fadlalla-ai, branch bugfix/r5.7-jadx-uses-managed-java
 - [x] A Ghidra folder setting that names a file, such as the `/usr/bin/ghidra` start script, is listed as
       found by `engines_list`, but Deep mode then quietly decompiles with the built-in lifter instead;
