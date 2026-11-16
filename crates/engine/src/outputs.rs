@@ -34,7 +34,53 @@ fn built_program_in(app: &Path, env: Option<&std::ffi::OsStr>) -> Option<PathBuf
     if !app.join("Cargo.toml").is_file() {
         return None;
     }
-    let targets = cargo_target_dirs(app, env);
+    program_in(app, &cargo_target_dirs(app, env))
+}
+
+/// [`built_program`] for the moment a program is about to start or be checked (Play, a pin, the
+/// build's run and screenshot checks). Cargo itself is asked where it builds (`cargo metadata`,
+/// run from the project), which also covers what the files read for [`built_program`] don't:
+/// `CARGO_BUILD_TARGET_DIR`, `$CARGO_HOME/config.toml` and a parent workspace's `target/`. Its
+/// answer is looked in first, then the same folders as [`built_program`]. It starts a process, so
+/// frequent reads (the Project screen) use [`built_program`]; without Cargo it is the same.
+pub fn built_program_now(app: &Path) -> Option<PathBuf> {
+    if !app.join("Cargo.toml").is_file() {
+        return None;
+    }
+    built_program_from(app, target_dir_of(cargo_metadata(app)), std::env::var_os("CARGO_TARGET_DIR").as_deref())
+}
+
+/// [`built_program_now`] with Cargo's answer and the environment given, for tests.
+fn built_program_from(app: &Path, asked: Option<PathBuf>, env: Option<&std::ffi::OsStr>) -> Option<PathBuf> {
+    let mut targets: Vec<PathBuf> = asked.iter().map(|d| crate::workspace::normalized(d)).collect();
+    for dir in cargo_target_dirs(app, env) {
+        if !targets.contains(&dir) {
+            targets.push(dir);
+        }
+    }
+    program_in(app, &targets)
+}
+
+/// `cargo metadata` for `app`, run from it: Cargo reads its configuration from the working
+/// directory, so this sees the same settings a `cargo build` there does.
+fn cargo_metadata(app: &Path) -> craft_anything_platform::process::Process {
+    craft_anything_platform::process::Process::new("cargo")
+        .args(["metadata", "--format-version", "1", "--no-deps", "--offline"])
+        .cwd(crate::workspace::absolute(app))
+        .timeout(std::time::Duration::from_secs(30))
+        .label("cargo metadata")
+}
+
+/// Where Cargo builds, from a `cargo metadata` run; none when Cargo is missing, fails or times out.
+fn target_dir_of(run: craft_anything_platform::process::Process) -> Option<PathBuf> {
+    let out = run.run().ok().filter(|o| o.success)?;
+    let meta: serde_json::Value = serde_json::from_slice(&out.stdout).ok()?;
+    meta.get("target_directory")?.as_str().map(PathBuf::from)
+}
+
+/// The program `app`'s manifests name (see [`built_program`]) in the first of `targets` that has
+/// it; with no name, the newest program in a target directory inside `app`.
+fn program_in(app: &Path, targets: &[PathBuf]) -> Option<PathBuf> {
     let built = |target: &Path| -> Vec<PathBuf> {
         ["release", "debug"]
             .iter()
@@ -220,6 +266,16 @@ pub fn absolute_program(program: &Path) -> PathBuf {
 /// project opens in the Godot it was built with, an Electron app in the Electron it installed.
 /// Other toolchains may declare an interpreted/runner launch when no packaged program exists.
 pub fn launch(app: &Path, godot: Option<&Path>) -> Option<(PathBuf, Vec<String>)> {
+    launch_with(app, godot, built_program)
+}
+
+/// [`launch`] for the moment of starting: a Rust build's program is found with
+/// [`built_program_now`], which asks Cargo where it builds.
+pub fn launch_now(app: &Path, godot: Option<&Path>) -> Option<(PathBuf, Vec<String>)> {
+    launch_with(app, godot, built_program_now)
+}
+
+fn launch_with(app: &Path, godot: Option<&Path>, rust_program: fn(&Path) -> Option<PathBuf>) -> Option<(PathBuf, Vec<String>)> {
     if app.join("project.godot").is_file() {
         let root = std::path::absolute(app).ok()?;
         return godot_launch(&root, godot?);
@@ -228,7 +284,7 @@ pub fn launch(app: &Path, godot: Option<&Path>) -> Option<(PathBuf, Vec<String>)
         let root = std::path::absolute(app).ok()?;
         return electron_program(&root).map(|e| (e, vec![root.display().to_string()]));
     }
-    built_program(app).or_else(|| packaged_program(&app.join("Build"))).map(|p| (p, Vec::new())).or_else(|| crate::toolchains::found_in(app)?.launch(app))
+    rust_program(app).or_else(|| packaged_program(&app.join("Build"))).map(|p| (p, Vec::new())).or_else(|| crate::toolchains::found_in(app)?.launch(app))
 }
 
 // Godot decodes --path as UTF-8. A lossy conversion could open a different project.
@@ -511,5 +567,102 @@ mod target_dir_tests {
         assert_eq!(cargo_target_dirs(&app, None), vec![app.join("target")], "config.toml in the same folder isn't used");
         legacy_config(&app, "[build\n");
         assert_eq!(cargo_target_dirs(&app, None), vec![app.join("target")], "an unreadable legacy config doesn't fall through either");
+    }
+
+    /// Cargo asked as a test needs: without this test run's own target settings or the developer's
+    /// `~/.cargo/config.toml` (an empty Cargo home beside `app`, unless `set` names one), plus `set`.
+    fn asked(app: &Path, set: &[(&str, &Path)]) -> Option<PathBuf> {
+        let empty_home = app.parent().unwrap().join("empty-cargo-home");
+        std::fs::create_dir_all(&empty_home).unwrap();
+        let mut run = cargo_metadata(app).env_remove("CARGO_TARGET_DIR").env_remove("CARGO_BUILD_TARGET_DIR").env("CARGO_HOME", &empty_home);
+        for (key, value) in set {
+            run = run.env(key, value);
+        }
+        target_dir_of(run)
+    }
+
+    fn package(dir: &Path, name: &str) {
+        std::fs::create_dir_all(dir.join("src")).unwrap();
+        std::fs::write(dir.join("Cargo.toml"), format!("[package]\nname = \"{name}\"\nversion = \"0.1.0\"\nedition = \"2021\"\n")).unwrap();
+        std::fs::write(dir.join("src/main.rs"), "fn main() {}\n").unwrap();
+    }
+
+    /// Compared as real paths: Cargo prints them its own way (no `\\?\`, `/private/var` on macOS).
+    fn real(p: Option<PathBuf>) -> Option<PathBuf> {
+        p.map(|p| p.canonicalize().unwrap())
+    }
+
+    #[test]
+    fn cargo_names_target_dirs_the_files_dont() {
+        let d = tempfile::tempdir().unwrap();
+        let app = d.path().join("app");
+        package(&app, "snake");
+
+        // CARGO_BUILD_TARGET_DIR: only Cargo reads it.
+        let from_env = d.path().join("from-env");
+        std::fs::create_dir_all(from_env.join("debug")).unwrap();
+        let answer = asked(&app, &[("CARGO_BUILD_TARGET_DIR", &from_env)]);
+        assert_eq!(real(answer.clone()), real(Some(from_env.clone())));
+        let program = from_env.join("debug").join(exe("snake"));
+        make_program(&program);
+        assert_eq!(built_program_in(&app, None), None, "the file lookup doesn't see it");
+        assert_eq!(real(built_program_from(&app, answer, None)), real(Some(program)));
+
+        // $CARGO_HOME/config.toml: outside the project and its folders.
+        let home = d.path().join("cargo-home");
+        let from_home = d.path().join("from-home");
+        std::fs::create_dir_all(&home).unwrap();
+        std::fs::create_dir_all(&from_home).unwrap();
+        std::fs::write(home.join("config.toml"), format!("[build]\ntarget-dir = '{}'\n", from_home.display())).unwrap();
+        assert_eq!(real(asked(&app, &[("CARGO_HOME", &home)])), real(Some(from_home)));
+    }
+
+    #[test]
+    fn a_workspace_member_is_found_in_the_workspace_target() {
+        let d = tempfile::tempdir().unwrap();
+        let root = d.path();
+        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = [\"app\"]\nresolver = \"2\"\n").unwrap();
+        let app = root.join("app");
+        package(&app, "snake");
+        let debug = root.join("target").join("debug");
+        std::fs::create_dir_all(&debug).unwrap();
+        let answer = asked(&app, &[]);
+        assert_eq!(real(answer.clone()), real(Some(root.join("target"))));
+        let program = debug.join(exe("snake"));
+        make_program(&program);
+        assert_eq!(built_program_in(&app, None), None, "the file lookup doesn't look above the project");
+        assert_eq!(real(built_program_from(&app, answer, None)), real(Some(program)));
+    }
+
+    #[test]
+    fn cargos_answer_outside_the_project_gives_only_a_named_program() {
+        // No program named in the manifest: a shared target directory's newest program belongs to
+        // another project, so it is never picked; the project's own build is.
+        let d = tempfile::tempdir().unwrap();
+        let app = d.path().join("app");
+        std::fs::create_dir_all(&app).unwrap();
+        std::fs::write(app.join("Cargo.toml"), "[package]").unwrap();
+        let shared = d.path().join("shared");
+        std::fs::create_dir_all(shared.join("debug")).unwrap();
+        make_program(&shared.join("debug").join(exe("other")));
+        assert_eq!(built_program_from(&app, Some(shared.clone()), None), None);
+        let own = app.join("target").join("debug");
+        std::fs::create_dir_all(&own).unwrap();
+        make_program(&own.join(exe("mine")));
+        assert_eq!(real(built_program_from(&app, Some(shared), None)), real(Some(own.join(exe("mine")))));
+    }
+
+    #[test]
+    fn without_an_answer_from_cargo_it_is_the_file_lookup() {
+        assert_eq!(target_dir_of(craft_anything_platform::process::Process::new("no-such-cargo-here")), None, "no Cargo");
+        let d = tempfile::tempdir().unwrap();
+        let app = d.path().join("app");
+        package(&app, "snake");
+        config(&app, "[build]\ntarget-dir = \"out\"\n");
+        let debug = app.join("out").join("debug");
+        std::fs::create_dir_all(&debug).unwrap();
+        make_program(&debug.join(exe("snake")));
+        assert_eq!(built_program_from(&app, None, None), built_program_in(&app, None));
+        assert!(built_program_from(&app, None, None).is_some());
     }
 }

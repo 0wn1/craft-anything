@@ -156,7 +156,7 @@ impl Pin {
             }
             return Ok((program, Vec::new()));
         }
-        crate::outputs::launch(&app, godot).ok_or_else(|| {
+        crate::outputs::launch_now(&app, godot).ok_or_else(|| {
             ToolError::new(ErrorCode::NotFound, "There's nothing to start: no built program in this pin.")
                 .with_remediation("Pin a working build or open the folder to look.")
         })
@@ -408,13 +408,13 @@ fn walk(from: &Path, to: &Path, skip: &dyn Fn(&Path) -> bool, depth: usize, out:
     Ok(())
 }
 
-/// What there is to start in `app`: the program and its arguments (see `outputs::launch`). A
+/// What there is to start in `app`: the program and its arguments (see `outputs::launch_now`). A
 /// website isn't pinned yet.
 fn start_of(app: &Path, godot: Option<&Path>) -> Result<(PathBuf, Vec<String>), ToolError> {
     if crate::outputs::site_dir(app).is_some() {
         return Err(ToolError::unsupported("This project made a website, and websites can't be pinned yet.").with_remediation("Use project_preview to see it."));
     }
-    crate::outputs::launch(app, godot).ok_or_else(|| {
+    crate::outputs::launch_now(app, godot).ok_or_else(|| {
         ToolError::new(ErrorCode::NotFound, "There's nothing to pin yet: no built program in this project.")
             .with_remediation("Finish a build first (rebuild), then pin it.")
     })

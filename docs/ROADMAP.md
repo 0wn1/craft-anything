@@ -784,11 +784,11 @@ yet, and the quick start is how every new person begins.
       name; without a name, only target directories inside the app are searched, and a pin copies
       such a program into its own folder; commits `842f011a`, `216295fd`
       — claimed: AlexJoaquimPereira, branch bugfix/r5.7-cargo-target-dir
-- [ ] Read a global `$CARGO_HOME/config.toml` `build.target-dir`, and a parent workspace's default
-      `target/`, when locating a Rust build's program; or ask Cargo (`cargo metadata`) only where a
-      program is about to start or be checked, keeping frequent reads on the files (PR #1942's
-      author offered this follow-up). The fix above reads the project/ancestor `.cargo` files and
-      `CARGO_TARGET_DIR`.
+- [x] Ask Cargo where a Rust build went where its program starts or is checked (Play, pins, the
+      build's run and screenshot checks): `launch_now` runs `cargo metadata` and looks in its
+      `target_directory` first, which covers `$CARGO_HOME/config.toml`, `CARGO_BUILD_TARGET_DIR`
+      and a parent workspace's `target/`; the Project screen keeps the file lookup. Checked on a
+      workspace member and a `CARGO_BUILD_TARGET_DIR` build that the file lookup doesn't find
       — claimed: Fadlalla-ai, branch fix/cargo-target-dir-at-start
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
