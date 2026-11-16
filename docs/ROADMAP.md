@@ -766,6 +766,7 @@ yet, and the quick start is how every new person begins.
       — claimed: Fadlalla-ai, branch test/r5.7-linux-quick-start
 - [ ] README quick start on a clean machine (Linux), the rest: the desktop window on a clean
       machine with a screen, and the README's `rebuild` commands with a signed-in coding agent
+      — claimed: Fadlalla-ai, branch test/r5.7-linux-window-and-rebuild
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
       2.1.179 and a current version. Windows passed; the Mac CLI was only checked to contain the
