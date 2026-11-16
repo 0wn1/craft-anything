@@ -774,6 +774,10 @@ yet, and the quick start is how every new person begins.
       Deep mode)
       — claimed: Fadlalla-ai, branch test/ghidra-setup-linux
 - [ ] Ghidra setup tried for real on macOS (the Java pins were checked by tests only)
+- [ ] The Java that Ghidra's guided setup brings (`<store>/jdk`) isn't found as the Java runtime engine,
+      which is looked for in `<store>/java`: `engines_list` still says Java isn't installed after the
+      setup that its install message points to, and tools that need Java (Vineflower) don't use it
+      — claimed: Fadlalla-ai, branch bugfix/r5.7-managed-java-found
 - [x] A Ghidra folder setting that names a file, such as the `/usr/bin/ghidra` start script, is listed as
       found by `engines_list`, but Deep mode then quietly decompiles with the built-in lifter instead;
       refuse it, or follow the script to its Ghidra folder. A file is now run only when it is the
