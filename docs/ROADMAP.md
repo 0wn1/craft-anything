@@ -774,9 +774,16 @@ yet, and the quick start is how every new person begins.
       Deep mode)
       — claimed: Fadlalla-ai, branch test/ghidra-setup-linux
 - [ ] Ghidra setup tried for real on macOS (the Java pins were checked by tests only)
-- [ ] A Ghidra folder setting that names a file, such as the `/usr/bin/ghidra` start script, is listed as
+- [x] A Ghidra folder setting that names a file, such as the `/usr/bin/ghidra` start script, is listed as
       found by `engines_list`, but Deep mode then quietly decompiles with the built-in lifter instead;
-      refuse it, or follow the script to its Ghidra folder
+      refuse it, or follow the script to its Ghidra folder. A file is now run only when it is the
+      headless launcher or a script that runs it; a link or start script is followed to its Ghidra
+      folder; anything else isn't listed as found. Live in Debian 13 with Ghidra 12.1.4 laid out as
+      Arch-based packages do: `/usr/bin/ghidra` and a linked `ghidraRun` now decompile with Ghidra
+      — claimed: Fadlalla-ai, branch bugfix/r5.7-ghidra-setting-names-a-file
+- [ ] Settings → Engines looks Ghidra up on every frame it shows "Installed" (`engine_ui.rs`, the
+      hover text calls `ghidra_launcher`): folders searched, and a start script read, while drawing.
+      Keep the path found with `GhidraFlow::ready` instead
 - [x] A Ghidra with no decompiler program for this computer (public downloads leave out macOS) is
       refused before the long analysis, with the command that builds it; checked on a real Mac
 - [ ] `engines_install` builds Ghidra's native programs on macOS, so a Mac install works unaided
