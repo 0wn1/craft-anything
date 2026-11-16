@@ -107,6 +107,19 @@ pub fn read_document(text: &str, allow_shorthand: bool) -> Option<Document> {
         let mut saw_anything = false;
         let mut parens = 0usize;
         while let Some(&(i, c)) = chars.peek() {
+            // Ignored tokens may separate any header tokens, including the name.
+            if c == '#' {
+                for (_, d) in chars.by_ref() {
+                    if d == '\n' || d == '\r' {
+                        break;
+                    }
+                }
+                continue;
+            }
+            if c.is_whitespace() || c == ',' || c == '\u{feff}' {
+                chars.next();
+                continue;
+            }
             if c == '{' && parens == 0 {
                 break;
             }
