@@ -790,9 +790,10 @@ yet, and the quick start is how every new person begins.
       folder; anything else isn't listed as found. Live in Debian 13 with Ghidra 12.1.4 laid out as
       Arch-based packages do: `/usr/bin/ghidra` and a linked `ghidraRun` now decompile with Ghidra
       — claimed: Fadlalla-ai, branch bugfix/r5.7-ghidra-setting-names-a-file
-- [ ] Settings → Engines looks Ghidra up on every frame it shows "Installed" (`engine_ui.rs`, the
+- [x] Settings → Engines looks Ghidra up on every frame it shows "Installed" (`engine_ui.rs`, the
       hover text calls `ghidra_launcher`): folders searched, and a start script read, while drawing.
-      Keep the path found with `GhidraFlow::ready` instead
+      Keep the path found with `GhidraFlow::ready` instead. The launcher's path is now kept where
+      "found or not" was (`GhidraFlow::found`), and looked up again after a settings change or install
       — claimed: Fadlalla-ai, branch bugfix/r5.7-settings-ghidra-lookup-once
 - [x] A Ghidra with no decompiler program for this computer (public downloads leave out macOS) is
       refused before the long analysis, with the command that builds it; checked on a real Mac
