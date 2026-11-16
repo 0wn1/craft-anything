@@ -653,7 +653,9 @@ launch or preview was run for this documentation correction.
 - A failed agent CLI run says what ran and what it printed, and writes a private log to `logs/` in the
   config folder (the newest 50 are kept; the person's message is left out; **Open log** in the app, `log:`
   in the CLI). Checked live against a GitHub ssh alias from the CLI; the button by a UI test, not by
-  clicking it in the desktop app. A failed API-backend turn writes one too, and so does a local MCP
+  clicking it in the desktop app. A failed API-backend turn writes one too (the error's code, its HTTP
+  status and a known error code from the service; its message, and a code that isn't a known one,
+  are left out), and so does a local MCP
   plugin that doesn't start or stops answering (its exit code and stderr; its `env` is left out and
   keys in its arguments are hidden); a remote one doesn't.
 - Live end-to-end runs (2026-10-18, Windows 10, headless CLI): a website clone reached Ready
