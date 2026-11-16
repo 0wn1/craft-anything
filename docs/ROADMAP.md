@@ -762,6 +762,7 @@ yet, and the quick start is how every new person begins.
 - [ ] A live run of a project copied between two real computers with Claude Code (#451, #452); done
       on one Mac with a second `CLAUDE_CONFIG_DIR` standing in for the other computer (STATUS.md)
 - [ ] Ghidra setup tried for real on Linux and macOS (the Java pins were checked by tests only)
+      — claimed: Fadlalla-ai, branch test/ghidra-setup-linux (the Linux half)
 - [x] A Ghidra with no decompiler program for this computer (public downloads leave out macOS) is
       refused before the long analysis, with the command that builds it; checked on a real Mac
 - [ ] `engines_install` builds Ghidra's native programs on macOS, so a Mac install works unaided
