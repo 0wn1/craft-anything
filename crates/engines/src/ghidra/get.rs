@@ -7,6 +7,9 @@ use std::path::{Path, PathBuf};
 
 /// Ghidra's engine id, as the engine table, Settings and every listing name it.
 pub const ID: &str = "ghidra";
+/// The engine store folder the Java for Ghidra is unpacked into; the Java runtime engine is found
+/// there too (the engine table's `Install::Guided::folder`).
+pub const JAVA_FOLDER: &str = "jdk";
 /// The Ghidra release Craft Anything installs (it needs Java 21).
 pub const VERSION: &str = "12.1.4";
 /// What the person downloads, for the question we ask first (Ghidra 543 MB + Java 196 MB).
@@ -116,7 +119,7 @@ fn named_in_script(file: &Path) -> Option<Vec<PathBuf>> {
 /// The Java runtime to run Ghidra with: the one the person set, else the managed one. `None` lets
 /// Ghidra look for its own.
 pub fn java_home(java_home: Option<&Path>, store: &Path) -> Option<PathBuf> {
-    java_home.filter(|p| p.is_dir()).map(Path::to_path_buf).or_else(|| in_child(&store.join("jdk"), |d| has_java(d).then(|| d.to_path_buf())))
+    java_home.filter(|p| p.is_dir()).map(Path::to_path_buf).or_else(|| in_child(&store.join(JAVA_FOLDER), |d| has_java(d).then(|| d.to_path_buf())))
 }
 
 /// Download, check and unpack Java (unless one is already managed) and Ghidra into the engine
@@ -133,7 +136,7 @@ pub fn install(store: &Path, cancel: Option<Cancel>, progress: &dyn Fn(&str, u64
             .with_remediation(format!("Install Ghidra {VERSION} from {PAGE}, then choose its folder in Settings → Engines.")));
     };
     if java_home(None, store).is_none() {
-        fetch(java, store, "jdk", "Java runtime", cancel.clone(), progress)?;
+        fetch(java, store, JAVA_FOLDER, "Java runtime", cancel.clone(), progress)?;
     }
     fetch(ghidra, store, "ghidra", "Ghidra", cancel, progress)?;
     let exe =
