@@ -270,12 +270,12 @@ fn built_program_follows_cargos_moved_target_directory() {
     let app = d.path();
     std::fs::create_dir_all(app.join(".cargo")).unwrap();
     std::fs::write(app.join(".cargo/config.toml"), "[build]\ntarget-dir = \"out\"\n").unwrap();
-    std::fs::write(app.join("Cargo.toml"), "[package]\nname = \"probe\"\n").unwrap();
+    std::fs::write(app.join("Cargo.toml"), "[package]\nname = \"cargo-target-probe\"\n").unwrap();
     std::fs::create_dir_all(app.join("src")).unwrap();
     std::fs::write(app.join("src/main.rs"), "fn main() {}\n").unwrap();
     let debug = app.join("out").join("debug");
     std::fs::create_dir_all(&debug).unwrap();
-    let exe = if cfg!(windows) { "probe.exe" } else { "probe" };
+    let exe = if cfg!(windows) { "cargo-target-probe.exe" } else { "cargo-target-probe" };
     let program = debug.join(exe);
     std::fs::write(&program, "x").unwrap();
     #[cfg(unix)]
