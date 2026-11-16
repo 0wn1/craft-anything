@@ -2968,6 +2968,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.13-har-transfer-size
 - [x] Read HAR captures with the permitted UTF-8 byte order mark.
       — claimed: Afloat16, branch bugfix/r3.13-har-bom-bounds-20261107
+- [ ] Match HTML script types against complete JavaScript MIME names and the exact module keyword.
+      — claimed: Plastic-time, branch bugfix/r3.12-html-types-1116
 - [x] The HTML scanner finds script preloads in `rel` token lists, decodes asset URLs once (numeric
       and named references), keeps script and title text through lookalike closing tags, and skips
       raw-text elements, markup inside attribute values and custom tag names such as
