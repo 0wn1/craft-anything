@@ -204,6 +204,30 @@ fn turning_on_generated_assets_without_a_fal_key_asks_for_one() {
 }
 
 #[test]
+fn ghidra_is_looked_up_once_and_again_only_when_asked() {
+    let d = tempfile::tempdir().unwrap();
+    let store = d.path().join("engines");
+    let remembered = std::path::PathBuf::from("/remembered/support/analyzeHeadless");
+    let found = remembered.clone();
+    let mut h = harness_sized(egui::vec2(1280.0, 800.0), move || {
+        let mut a = demo::app(demo::engine(Mode::Beginner, true));
+        // An empty engine store, and nowhere else looked in: a lookup finds no Ghidra here.
+        a.settings.engines.store_dir = Some(store);
+        a.settings.engines.only_configured = true;
+        a.ghidra.found = Some(Some(found));
+        a
+    });
+    h.run_steps(3);
+    // What was found is kept while drawing, not looked up again (a lookup would find nothing).
+    assert_eq!(h.state_mut().ghidra_found(), Some(remembered.as_path()));
+    assert!(h.state_mut().ghidra_ready());
+    // After a settings change or an install it is looked up again.
+    h.state_mut().ghidra.found = None;
+    assert_eq!(h.state_mut().ghidra_found(), None);
+    assert!(!h.state_mut().ghidra_ready());
+}
+
+#[test]
 fn deep_mode_without_ghidra_asks_to_get_it_before_using_it() {
     use craft_anything_engine::workspace::TargetRef;
     use craft_anything_engines::game::{Builder, Installed, Inventory};

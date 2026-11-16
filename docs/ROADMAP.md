@@ -794,9 +794,11 @@ yet, and the quick start is how every new person begins.
       that runs the launcher was passed over for that folder's launcher, and a start script naming a
       link onto PATH (`exec /usr/bin/ghidraRun`) wasn't followed through it
       — claimed: Fadlalla-ai, branch bugfix/r5.7-ghidra-wrapper-and-linked-script
-- [ ] Settings → Engines looks Ghidra up on every frame it shows "Installed" (`engine_ui.rs`, the
+- [x] Settings → Engines looks Ghidra up on every frame it shows "Installed" (`engine_ui.rs`, the
       hover text calls `ghidra_launcher`): folders searched, and a start script read, while drawing.
-      Keep the path found with `GhidraFlow::ready` instead
+      Keep the path found with `GhidraFlow::ready` instead. The launcher's path is now kept where
+      "found or not" was (`GhidraFlow::found`), and looked up again after a settings change or install
+      — claimed: Fadlalla-ai, branch bugfix/r5.7-settings-ghidra-lookup-once
 - [x] A Ghidra with no decompiler program for this computer (public downloads leave out macOS) is
       refused before the long analysis, with the command that builds it; checked on a real Mac
 - [ ] `engines_install` builds Ghidra's native programs on macOS, so a Mac install works unaided
