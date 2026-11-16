@@ -346,6 +346,11 @@ Every round spends the person's money or quota. One that can't do anything shoul
       `agent.session_id()` is set, which API backends and OpenCode's plain adapter never set (read
       in the code, not run). So #148 didn't reach #142, which was OpenCode. Wait and send the turn
       again for them too, then close #142 — commit `f80a16a66834`
+- [x] A Claude Code plan's 5-hour or weekly limit that's used up stops the build at once and says
+      when it resets; it was retried as a per-minute rate limit, failing again each time (#1919).
+      Read from the stream's `rate_limit_event` (seen live with `status: allowed`), not the message;
+      not seen live with a used-up plan. Other agents' plan limits are still retried
+      — claimed: justinjohn0306, branch bugfix/r5.3-plan-limit-stops
 - [x] A builder step on an API backend stops after 25 failed build commands in a row (none
       succeeding between), says so and keeps the project (`MAX_FAILED_BUILDS` in `agent.rs`, #399:
       9.4M tokens in 19 minutes of the first stage, never compiled). Try again carries on
@@ -643,6 +648,9 @@ Owner: open · Status: todo
 - [x] Failure logs for an MCP server that doesn't start: a local `[[plugins.mcp]]` server that can't
       start, exits or doesn't answer writes one to `logs/` (what ran, its exit code and stderr, never
       its `env`) and the error names it; an exit says what it printed. A remote server gets none
+- [x] Review of #1921: a key in a plugin's arguments (`?token=…`) is hidden in its log, a server that
+      stops answering is stopped and its error and log keep what it printed, and a failed write waits
+      a moment for the exit. The wait after a failed write has no test of its own (it's a race)
 - [x] Settings → AI can replace or forget an API backend's saved key, so a key rotated in the
       environment isn't hidden behind an older saved one (#1358); `ai key <name>` shows, replaces
       or forgets it headlessly, and never prints it
@@ -1603,6 +1611,12 @@ Gaps found while using the app for real projects.
       rejection before an HTTP request, successful HTTPS redirects, hashes and file protection;
       the downgrade test fails without the HTTPS-only policy. Checked on Windows
       — claimed: Butler12345, branch bugfix/r2.9-https-engine-downloads
+- [x] On Windows, engine downloads go through the person's manual system proxy when no proxy
+      variable is set; they only read `HTTPS_PROXY` and the like, so behind a VPN that sets the
+      system proxy the Godot and Ghidra downloads timed out (#1787, #1827). Only engine
+      downloads; AI clients are unchanged. The setting's forms are unit-tested; not run behind a
+      real system proxy
+      — claimed: justinjohn0306, branch bugfix/r2.9-windows-proxy-downloads
 - [x] Settings → AI: a card for an AI found on this computer wraps its description beside its Add
       button; the line didn't wrap and ran on under the button
       — claimed: jgt87, branch bugfix/r2.9-detected-cards-wrap — PR #1235
@@ -2898,6 +2912,10 @@ Owner: open · Status: in progress
       template only real calendar dates in API paths (#602–#605, by Afloat16)
 - [x] Preserve empty query pairs when matching older stand-in recordings, without treating raw
       query separators as pairs — claimed: Afloat16, branch `bugfix/r3.13-preserve-empty-query-pairs-20261103`
+- [x] A walkthrough's `keep_bodies` keeps response bodies only for the first 200 requests and says
+      nothing about the rest (#1811; `web_page_show`'s outlines were fixed in #1845): count the kept
+      bodies and say how many were left out and why.
+      — claimed: htcom-code, branch bugfix/r3.13-body-outline-cap
 
 ---
 

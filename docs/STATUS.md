@@ -32,6 +32,7 @@ coverage and secrets passed. The companion CLI was built with locked dependencie
 | Area | State | Verified by |
 |---|---|---|
 | Engine download redirects | Shared engine downloads require HTTPS on every redirect hop. A refused HTTP destination is not requested or included in the refusal diagnostic; existing hashes and file transactions are retained. | Six bounded local HTTP/TLS tests cover downgrade rejection with zero HTTP requests, HTTPS redirects, checksum success/failure, file preservation and cleanup, redirect cycles, initial HTTP and untrusted certificates. The downgrade regression records one HTTP request before the policy fix, zero after it. Tested on Windows; no live large engine installation claimed. |
+| Engine downloads behind a proxy | Engine downloads use `ALL_PROXY`/`HTTPS_PROXY`/`HTTP_PROXY`; on Windows, without them, the person's manual system proxy (its HTTPS entry, else HTTP), with this computer and Windows' exceptions (or `NO_PROXY`) going direct. AI clients don't read the system proxy. | Unit tests of the setting's forms and exceptions; not run behind a real system proxy, PAC scripts and SOCKS-only settings aren't read, and an exception with a `*` other than one at its start or end (`*github*`) is left out. |
 | Required WASM fonts | A required craft-fonts build fails when target filtering selects no fonts, even if its manifest lists valid entries. Empty manifests keep their own diagnostic; optional filtered builds stay silent and successful. | Eight build-plan tests cover family/style filtering, partial and allowed-only selections, empty manifests, missing files, native builds and required/optional values. Standalone Cargo fixtures using the build script cross-compile to wasm32-unknown-unknown: the original script accepts an empty required selection; the corrected script rejects it and accepts the allowed face. No browser rendering was tested. |
 | CLI signature type handles | CLASS, VALUETYPE and generic constructors accept TypeDef/TypeRef handles rather than expanding nested TypeSpec signatures; standalone TypeSpec and custom modifiers remain supported. | Four focused groups cover direct and nested invalid handles, legitimate generic types and custom modifiers. The separate recursive fixture times out on the original parser and completes under the same 128 MiB / two-second process limits after the correction. |
 | CLI array shape notation | General rank-one arrays remain distinct from vectors, and array dimensions retain declared sizes and signed lower bounds in CLI notation. | Five regression groups cover rank-one identity, bounded and partial shapes, nesting, member/local projections, malformed counts and maximum compressed values. |
@@ -412,6 +413,10 @@ Builder failures carry a typed reason through `Conversation::last_failure`. Type
 billing, missing programs, unavailable tools, configuration and unknown protocol failures stop
 for attention. Transport interruptions, rate limits and nonzero process exits without a typed
 error get at most three retries; the decision no longer searches English error messages.
+A Claude Code rate limit after its stream said the plan's limit refused the turn
+(`rate_limit_event` with `status: rejected`: the 5-hour or weekly allowance) isn't retried; the
+build stops and says which limit and about when it resets (#1919). Unit-tested on the stream;
+not seen live with a used-up plan.
 Structured provider waits win; the earlier numeric “retry in”
 hint is only a delay fallback after a failure has already been classified as retryable. All waits
 remain cancellable and bounded to fifteen minutes.
@@ -632,7 +637,8 @@ launch or preview was run for this documentation correction.
   config folder (the newest 50 are kept; the person's message is left out; **Open log** in the app, `log:`
   in the CLI). Checked live against a GitHub ssh alias from the CLI; the button by a UI test, not by
   clicking it in the desktop app. A failed API-backend turn writes one too, and so does a local MCP
-  plugin that doesn't start (its exit code and stderr; its `env` is left out); a remote one doesn't.
+  plugin that doesn't start or stops answering (its exit code and stderr; its `env` is left out and
+  keys in its arguments are hidden); a remote one doesn't.
 - Live end-to-end runs (2026-10-18, Windows 10, headless CLI): a website clone reached Ready
   at 96% likeness in 1.5 min; a small desktop app rebuilt in Rust + egui reached Ready in 9 min (checked
   only by building); a game rebuild in Rust reached Build and was stopped before Check. The
