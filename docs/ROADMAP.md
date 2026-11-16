@@ -778,13 +778,17 @@ yet, and the quick start is how every new person begins.
 - [ ] README quick start on a clean machine (Linux), still open: the website `rebuild` examples,
       a `rebuild` on a clean machine, the window on a real screen, and a Wayland session
 - [x] A Rust build whose folder's Cargo settings move its output (`build.target-dir` or
-      `CARGO_TARGET_DIR`): `built_program` now reads `CARGO_TARGET_DIR`, the closest project or
-      ancestor `.cargo` setting, then the default `target/`, so Play and the checks find the
-      program; commit `efff13a2`
+      `CARGO_TARGET_DIR`): `built_program` reads `CARGO_TARGET_DIR`, the closest project or
+      ancestor `config`/`config.toml` setting, then the default `target/`, so Play and the checks
+      find the program. A target directory outside the app supplies only a program the manifests
+      name; without a name, only target directories inside the app are searched, and a pin copies
+      such a program into its own folder; commits `842f011a`, `216295fd`
       — claimed: AlexJoaquimPereira, branch bugfix/r5.7-cargo-target-dir
 - [ ] Read a global `$CARGO_HOME/config.toml` `build.target-dir`, and a parent workspace's default
-      `target/`, when locating a Rust build's program; the fix above reads the project/ancestor
-      `.cargo` files and `CARGO_TARGET_DIR`
+      `target/`, when locating a Rust build's program; or ask Cargo (`cargo metadata`) only where a
+      program is about to start or be checked, keeping frequent reads on the files (PR #1942's
+      author offered this follow-up). The fix above reads the project/ancestor `.cargo` files and
+      `CARGO_TARGET_DIR`.
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
       2.1.179 and a current version. Windows passed; the Mac CLI was only checked to contain the
