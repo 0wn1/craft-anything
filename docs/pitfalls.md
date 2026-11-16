@@ -175,6 +175,13 @@ sign-out right after the reservation was dropped was refused as busy in about on
 run in four, never alone. A non-blocking lock tries again for a moment (`lock_site`'s
 `LOCK_GRACE`) before calling something busy, and a lock test is run inside the full suite.
 
+**A test that passed only without the developer's `CARGO_TARGET_DIR`.** Since the program
+lookup reads `CARGO_TARGET_DIR`, four pin tests failed on a machine that exported it: a live check
+had left a real `snake` program in that shared folder, and the tests' project is also called snake.
+The product had the same fault: any same-named program there was taken for the project's. Run the
+engine tests with `CARGO_TARGET_DIR` set to a folder holding other builds, and a lookup in a
+shared folder needs proof that a file is this project's, not just its name.
+
 **A free port handed to another test.** For a negative TCP probe, a bound port stopped being
 ours as soon as its listener was dropped. Another fixture could acquire it before the probe.
 Use the unassigned loopback port zero to exercise a real connection refusal without borrowing
