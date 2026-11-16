@@ -1907,9 +1907,11 @@ to the project next.
       loaded machine could grow the file past the bound with nothing wrong. The stand-in now reads
       its own log and stops once it has seen a cut and written past it
       — claimed: muraa-p, branch test/r2.10-log-cap-waits-for-cut
-- [ ] A slow pin size estimate that finishes after the person cancels or opens another project's
-      dialog is applied to the open dialog: the estimate and its errors should name their project,
-      and the dialog should ignore a result for another project or a closed dialog
+- [x] A slow pin size estimate that finished after the person cancelled or opened another
+      project's dialog was applied to the open dialog: the estimate and its errors now name their
+      project, and the dialog ignores a result for another project or a closed dialog. The result
+      and error detail carry the project; UI regressions cover a late estimate, a late error and a
+      closed dialog
       — claimed: AlexJoaquimPereira, branch bugfix/r2.10-pin-estimate-project
 - [ ] Opening a pin that's already running brings its window to the front, instead of a message
 - [x] How much space pins take in Settings
