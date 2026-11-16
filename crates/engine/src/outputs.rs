@@ -52,13 +52,24 @@ pub fn built_program_now(app: &Path) -> Option<PathBuf> {
 
 /// [`built_program_now`] with Cargo's answer and the environment given, for tests.
 fn built_program_from(app: &Path, asked: Option<PathBuf>, env: Option<&std::ffi::OsStr>) -> Option<PathBuf> {
-    let mut targets: Vec<PathBuf> = asked.iter().map(|d| crate::workspace::normalized(d)).collect();
+    let mut targets: Vec<PathBuf> = asked.into_iter().map(|d| under_app(app, d)).collect();
     for dir in cargo_target_dirs(app, env) {
         if !targets.contains(&dir) {
             targets.push(dir);
         }
     }
     program_in(app, &targets)
+}
+
+/// Cargo prints real paths (links resolved, no `\\?\`), so a target folder inside a project
+/// opened through a link would look outside it: put it back under the path `app` was given as.
+fn under_app(app: &Path, dir: PathBuf) -> PathBuf {
+    let normal = crate::workspace::normalized(&dir);
+    let (Ok(real_app), Ok(real_dir)) = (app.canonicalize(), dir.canonicalize()) else { return normal };
+    match real_dir.strip_prefix(&real_app) {
+        Ok(rest) => crate::workspace::normalized(app).join(rest),
+        Err(_) => normal,
+    }
 }
 
 /// `cargo metadata` for `app`, run from it: Cargo reads its configuration from the working
@@ -664,5 +675,22 @@ mod target_dir_tests {
         make_program(&debug.join(exe("snake")));
         assert_eq!(built_program_from(&app, None, None), built_program_in(&app, None));
         assert!(built_program_from(&app, None, None).is_some());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_project_opened_through_a_link_keeps_its_own_build_inside_it() {
+        // Cargo answers with the real path. The program found must still be under the path the
+        // project was opened with, or a pin takes the project's own build for an outside one.
+        let d = tempfile::tempdir().unwrap();
+        let target = d.path().join("real");
+        package(&target, "mine");
+        std::fs::create_dir_all(target.join("target").join("debug")).unwrap();
+        make_program(&target.join("target").join("debug").join(exe("mine")));
+        let link = d.path().join("link");
+        std::os::unix::fs::symlink(&target, &link).unwrap();
+        let cargo_says = target.canonicalize().unwrap().join("target");
+        assert_eq!(under_app(&link, cargo_says.clone()), crate::workspace::normalized(&link.join("target")));
+        assert_eq!(built_program_from(&link, Some(cargo_says), None), Some(crate::workspace::normalized(&link.join("target/debug/mine"))));
     }
 }

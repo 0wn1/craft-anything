@@ -156,7 +156,9 @@ impl Pin {
             }
             return Ok((program, Vec::new()));
         }
-        crate::outputs::launch_now(&app, godot).ok_or_else(|| {
+        // A pin from before programs were recorded: its own copy decides, not where Cargo builds
+        // the project now (a global target-dir would point at the latest build).
+        crate::outputs::launch(&app, godot).ok_or_else(|| {
             ToolError::new(ErrorCode::NotFound, "There's nothing to start: no built program in this pin.")
                 .with_remediation("Pin a working build or open the folder to look.")
         })
