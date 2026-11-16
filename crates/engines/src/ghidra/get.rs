@@ -73,16 +73,19 @@ fn launcher_from_file(file: &Path) -> Option<PathBuf> {
     if is_launcher(file) || is_launcher(&real) {
         return Some(file.to_path_buf());
     }
-    let folder_of = |p: &Path| p.parent().and_then(|dir| launcher(dir).or_else(|| dir.parent().and_then(launcher)));
-    // The path as given first: on Windows `canonicalize` adds `\\?\`, which batch files handle badly.
-    if let Some(found) = folder_of(file).or_else(|| folder_of(&real)) {
-        return Some(found);
-    }
-    let named = named_in_script(&real)?;
+    // A script that runs the launcher is kept before anything else, even in Ghidra's own folder.
+    let named = named_in_script(&real).unwrap_or_default();
     if named.iter().any(|p| is_launcher(p) && p.is_file()) {
         return Some(file.to_path_buf());
     }
-    named.iter().find_map(|p| if p.is_dir() { launcher(p) } else { folder_of(p) })
+    let folder_of = |p: &Path| p.parent().and_then(|dir| launcher(dir).or_else(|| dir.parent().and_then(launcher)));
+    // The path as given first, then where its links lead: on Windows `canonicalize` adds `\\?\`,
+    // which batch files handle badly.
+    let followed = |p: &Path| folder_of(p).or_else(|| folder_of(&std::fs::canonicalize(p).ok()?));
+    if let Some(found) = folder_of(file).or_else(|| folder_of(&real)) {
+        return Some(found);
+    }
+    named.iter().find_map(|p| if p.is_dir() { launcher(p) } else { followed(p) })
 }
 
 /// The absolute paths a short text file names that are on disk, as a start script names Ghidra's
@@ -385,6 +388,24 @@ mod tests {
         touch(&wrapper);
         std::fs::write(&wrapper, format!("#!/bin/sh\nJAVA_HOME=/jdk exec \"{}\" \"$@\"\n", exe.display())).unwrap();
         assert_eq!(headless_configured(Some(&wrapper), &d.path().join("store")), Some(wrapper));
+        // Also when it sits in Ghidra's own folder, beside `ghidraRun`.
+        let beside = d.path().join("ghidra").join("headless-with-java");
+        std::fs::write(&beside, format!("#!/bin/sh\nJAVA_HOME=/jdk exec \"{}\" \"$@\"\n", exe.display())).unwrap();
+        assert_eq!(headless_configured(Some(&beside), &d.path().join("store")), Some(beside));
+    }
+
+    /// A start script that runs a link onto PATH (`exec /usr/bin/ghidraRun`) leads to where it points.
+    #[cfg(unix)]
+    #[test]
+    fn a_start_script_naming_a_link_is_followed_through_it() {
+        let d = tempfile::tempdir().unwrap();
+        let exe = ghidra_folder(&d.path().join("opt").join("ghidra"));
+        let bin = d.path().join("usr").join("bin");
+        std::fs::create_dir_all(&bin).unwrap();
+        std::os::unix::fs::symlink(d.path().join("opt").join("ghidra").join("ghidraRun"), bin.join("ghidraRun")).unwrap();
+        let script = d.path().join("ghidra");
+        std::fs::write(&script, format!("#!/bin/sh\nexec \"{}\" \"$@\"\n", bin.join("ghidraRun").display())).unwrap();
+        assert!(same(headless_configured(Some(&script), &d.path().join("store")), &exe));
     }
 
     #[test]
