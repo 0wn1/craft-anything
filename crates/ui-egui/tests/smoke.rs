@@ -211,8 +211,9 @@ fn ghidra_is_looked_up_once_and_again_only_when_asked() {
     let found = remembered.clone();
     let mut h = harness_sized(egui::vec2(1280.0, 800.0), move || {
         let mut a = demo::app(demo::engine(Mode::Beginner, true));
-        // An empty engine store: a lookup finds no Ghidra here.
+        // An empty engine store, and nowhere else looked in: a lookup finds no Ghidra here.
         a.settings.engines.store_dir = Some(store);
+        a.settings.engines.only_configured = true;
         a.ghidra.found = Some(Some(found));
         a
     });
