@@ -764,8 +764,17 @@ yet, and the quick start is how every new person begins.
       needed `build-essential`, now in the README's package line; then the app and CLI built and
       `doctor` was healthy (STATUS.md, "Linux quick start")
       — claimed: Fadlalla-ai, branch test/r5.7-linux-quick-start
-- [ ] README quick start on a clean machine (Linux), the rest: the desktop window on a clean
-      machine with a screen, and the README's `rebuild` commands with a signed-in coding agent
+- [x] README quick start on a clean machine (Linux), the window and the snake `rebuild`: the window
+      opened on a clean Ubuntu 24.04 (X11, virtual screen) once `libxkbcommon-x11-0` was installed
+      (now in the package line), and the snake-game `rebuild` reached Ready with Claude Code on a
+      desktop that wasn't clean (STATUS.md, "Linux quick start")
+      — claimed: Fadlalla-ai, branch test/r5.7-linux-window-and-rebuild
+- [ ] README quick start on a clean machine (Linux), still open: the website `rebuild` examples,
+      a `rebuild` on a clean machine, the window on a real screen, and a Wayland session
+- [ ] A Rust build whose folder's Cargo settings move its output (`build.target-dir` or
+      `CARGO_TARGET_DIR`): the first build check didn't find the program in the project, and the
+      builder had to set `target-dir = "target"` itself. Find where the check looks, and read
+      Cargo's target directory there
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
       2.1.179 and a current version. Windows passed; the Mac CLI was only checked to contain the

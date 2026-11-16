@@ -591,9 +591,21 @@ tools; every optional engine but `objdump` absent, as expected). In a container 
 screen, so `cargo run` stopped with winit's "neither WAYLAND_DISPLAY nor WAYLAND_SOCKET nor DISPLAY
 is set." On a Debian 13 desktop (GNOME on X11, NVIDIA RTX 3060, driver 550.163.01; not a clean
 machine) the release build opened its window, drawing with Vulkan on the NVIDIA card.
-Not checked: the window on a clean machine (the containers have no screen; the machine that opened it
-already had build tools), the README's `rebuild` commands (they need a signed-in coding agent), Fedora
-or another distribution, Wayland, and the app beyond opening its window.
+Then (2026-11-16, `main` at `090188d7`) the window on a clean machine: a fresh Ubuntu 24.04 container
+with the README's packages (by then with `build-essential`) built the release app first time, and was
+given a virtual screen (Xvfb, X11, software rendering; added only so the container has a screen). The
+app stopped before its window with "Library libxkbcommon-x11.so could not be loaded": nothing in the
+package line installs the X11 half of xkbcommon, which desktop systems usually already have. With
+`libxkbcommon-x11-0` added (now in the package line) the window opened on its welcome screen, drawing
+on llvmpipe. The README's `craft-anything-cli rebuild - "A snake game in Rust" --rounds 1` ran on the
+Debian 13 desktop above with Claude Code 2.1.322 signed in, adding `--unattended`, `--backend "Claude
+Code"` and `--projects-dir` so it could run without a terminal: Ready in 3 min 24 s, 3 of 4 checks
+passing (build, a picture of the running game, the self-test playing move, eat and score); the
+mechanics comparison stayed unverified, as there was no original to measure. That folder's own Cargo
+settings sent builds elsewhere (`build.target-dir`), so the first check didn't find the program and
+the builder set `target-dir = "target"` in the app's `.cargo/config.toml`.
+Not checked: Wayland, a real screen on a clean machine, the website `rebuild` examples (they need a
+browser), Fedora or another distribution, and the app beyond its first screen.
 
 ### Linux graphics card choice
 
