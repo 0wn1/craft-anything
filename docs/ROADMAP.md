@@ -781,6 +781,11 @@ yet, and the quick start is how every new person begins.
       and the lookup and installs use it. Live in Debian 13 after `engines_install ghidra`: Vineflower
       decompiled a jar with that Java (before: "Java runtime is not installed")
       — claimed: Fadlalla-ai, branch bugfix/r5.7-managed-java-found
+- [ ] A path set in Settings → Engines (`engines.tools.<id>`) that names a folder, such as a JDK's
+      folder for the Java runtime, counts as found: `engines_list`, `doctor` and `Requires::Engine`
+      say it's there, and running it then fails with "permission denied". Look for the program in
+      the folder, as an install folder holds it, and say so plainly when it isn't there
+      — claimed: Fadlalla-ai, branch bugfix/r5.7-engine-path-folder
 - [ ] A Java set for Ghidra (Settings → Engines, `engines.ghidra.java_home`) isn't used as the Java
       runtime either, so Vineflower still says Java isn't installed with only that set
 - [x] A Ghidra folder setting that names a file, such as the `/usr/bin/ghidra` start script, is listed as
