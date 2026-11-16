@@ -847,6 +847,13 @@ yet, and the quick start is how every new person begins.
       and a parent workspace's `target/`; the Project screen keeps the file lookup. Checked on a
       workspace member and a `CARGO_BUILD_TARGET_DIR` build that the file lookup doesn't find
       — claimed: Fadlalla-ai, branch fix/cargo-target-dir-at-start
+- [x] With `CARGO_TARGET_DIR` set (a build folder shared by several projects), a program of the
+      same name built by another project there is taken for the project's own: Play and a new pin
+      can start or copy it, and a pin made before programs were recorded looks outside its copy.
+      Take a program from a target directory outside the app only when Cargo's record of it
+      (`<name>.d`) names the app's sources, and start an older pin from its own copy only. Done:
+      the newest of the project's own builds is started; an older pin looks only inside its copy
+      — claimed: Fadlalla-ai, branch bugfix/r5.7-pin-own-program
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
       2.1.179 and a current version. Windows passed; the Mac CLI was only checked to contain the

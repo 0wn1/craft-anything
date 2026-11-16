@@ -158,7 +158,7 @@ impl Pin {
         }
         // A pin from before programs were recorded: its own copy decides, not where Cargo builds
         // the project now (a global target-dir would point at the latest build).
-        crate::outputs::launch(&app, godot).ok_or_else(|| {
+        crate::outputs::launch_inside(&app, godot).ok_or_else(|| {
             ToolError::new(ErrorCode::NotFound, "There's nothing to start: no built program in this pin.")
                 .with_remediation("Pin a working build or open the folder to look.")
         })
@@ -677,6 +677,27 @@ mod tests {
         }
     }
 
+    /// A pin made before programs were recorded starts its own copy's program, even when a Cargo
+    /// setting above it (or `CARGO_TARGET_DIR`) names a build folder with a newer build of the
+    /// project in it.
+    #[test]
+    fn an_older_pin_starts_its_own_copy_not_the_projects_newest_build() {
+        let d = tempfile::tempdir().unwrap();
+        let ws = built(d.path());
+        let mut pin = create(&ws, PinMode::Frozen, None, None, &mut |_, _| true).unwrap();
+        pin.program = None;
+        let own = pin.app_dir(&ws).join("target/release").join(exe("snake"));
+        assert_eq!(pin.launch(&ws, None).unwrap().0, own);
+        std::fs::create_dir_all(ws.root.join(".cargo")).unwrap();
+        std::fs::write(ws.root.join(".cargo/config.toml"), "[build]\ntarget-dir = \"shared-out\"\n").unwrap();
+        let newer = ws.root.join("shared-out/release").join(exe("snake"));
+        std::fs::create_dir_all(newer.parent().unwrap()).unwrap();
+        std::fs::write(&newer, b"the project's next build").unwrap();
+        mark_program(&newer);
+        std::fs::write(newer.with_extension("d"), format!("{}: {}\n", newer.display(), ws.app_dir().join("src/main.rs").display())).unwrap();
+        assert_eq!(pin.launch(&ws, None).unwrap().0, own, "the pin's own copy, not the project's newest build");
+    }
+
     /// R5.7: a named program built outside the app (a moved Cargo target directory) is copied into
     /// the pin and recorded there, so a frozen pin doesn't depend on the external build folder.
     #[test]
@@ -694,6 +715,8 @@ mod tests {
         let program = shared.join(exe("pin-probe"));
         std::fs::write(&program, b"program").unwrap();
         mark_program(&program);
+        // What Cargo writes beside the program: the sources it was built from.
+        std::fs::write(shared.join("pin-probe.d"), format!("{}: {}\n", program.display(), app.join("src/main.rs").display())).unwrap();
         let other = shared.join(exe("other-project"));
         std::fs::write(&other, b"other").unwrap();
         mark_program(&other);
