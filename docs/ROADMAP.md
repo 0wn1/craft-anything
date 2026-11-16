@@ -790,6 +790,10 @@ yet, and the quick start is how every new person begins.
       folder; anything else isn't listed as found. Live in Debian 13 with Ghidra 12.1.4 laid out as
       Arch-based packages do: `/usr/bin/ghidra` and a linked `ghidraRun` now decompile with Ghidra
       — claimed: Fadlalla-ai, branch bugfix/r5.7-ghidra-setting-names-a-file
+- [x] Two cases left by the line above (review of #1949): a wrapper script in Ghidra's own folder
+      that runs the launcher was passed over for that folder's launcher, and a start script naming a
+      link onto PATH (`exec /usr/bin/ghidraRun`) wasn't followed through it
+      — claimed: Fadlalla-ai, branch bugfix/r5.7-ghidra-wrapper-and-linked-script
 - [x] Settings → Engines looks Ghidra up on every frame it shows "Installed" (`engine_ui.rs`, the
       hover text calls `ghidra_launcher`): folders searched, and a start script read, while drawing.
       Keep the path found with `GhidraFlow::ready` instead. The launcher's path is now kept where
