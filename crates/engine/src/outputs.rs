@@ -20,29 +20,83 @@ pub fn site_dir(app: &Path) -> Option<PathBuf> {
 /// The program a Rust build in `app` made, so a finished game or app can be started. A workspace
 /// often builds several (the app, its CLI, tools), so the project's own Cargo.toml files decide:
 /// its `default-run`, then a program whose package uses a window or game library, then the root
-/// package's; the newest build of that program wins (release or debug). Only when the manifests
-/// name no programs is it the newest executable. Build scripts and dependencies live in
-/// subfolders and are skipped, and so are stray copies (`app.running-123.exe`) of a declared one.
-/// shortcut: assumes the default target dir; read `cargo metadata` if a project ever moves it.
+/// package's; the newest build of that program wins (release or debug) in the first target
+/// directory that has it. Only when the manifests name no programs is it the newest executable.
+/// Build scripts and dependencies live in subfolders and are skipped, and so are stray copies
+/// (`app.running-123.exe`) of a declared one.
 pub fn built_program(app: &Path) -> Option<PathBuf> {
     if !app.join("Cargo.toml").is_file() {
         return None;
     }
-    let built: Vec<PathBuf> = ["release", "debug"]
-        .iter()
-        .filter_map(|d| std::fs::read_dir(app.join("target").join(d)).ok())
-        .flatten()
-        .flatten()
-        .map(|e| e.path())
-        .filter(|p| p.is_file() && is_program(p))
-        .collect();
-    let newest = |ps: &mut dyn Iterator<Item = &PathBuf>| ps.max_by_key(|p| p.metadata().and_then(|m| m.modified()).ok()).cloned();
-    let stem = |p: &Path| p.file_stem().and_then(|s| s.to_str()).map(str::to_string).unwrap_or_default();
+    let targets = cargo_target_dirs(app, std::env::var_os("CARGO_TARGET_DIR").as_deref());
+    let built = |target: &Path| -> Vec<PathBuf> {
+        ["release", "debug"]
+            .iter()
+            .filter_map(|d| std::fs::read_dir(target.join(d)).ok())
+            .flatten()
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| p.is_file() && is_program(p))
+            .collect()
+    };
+    let newest = |mut programs: Vec<PathBuf>, name: Option<&str>| -> Option<PathBuf> {
+        if let Some(name) = name {
+            programs.retain(|p| p.file_stem().and_then(|s| s.to_str()) == Some(name));
+        }
+        programs.into_iter().max_by_key(|p| p.metadata().and_then(|m| m.modified()).ok())
+    };
     let wanted = cargo_programs(app);
     if wanted.is_empty() {
-        return newest(&mut built.iter());
+        return targets.iter().find_map(|target| newest(built(target), None));
     }
-    wanted.iter().find_map(|name| newest(&mut built.iter().filter(|p| stem(p) == *name)))
+    wanted.iter().find_map(|name| targets.iter().find_map(|target| newest(built(target), Some(name.as_str()))))
+}
+
+/// The directories Cargo may have written the build to, best first: `CARGO_TARGET_DIR`, the
+/// closest `.cargo/config.toml` (or `.cargo/config`) with `build.target-dir`, then `app/target`.
+/// A project's setting is relative to the folder holding `.cargo`; the environment's is relative
+/// to `app`, where Cargo runs. The default stays last, so a program built before the setting
+/// moved is still found. Reading the settings starts no program, so Play and the checks may call
+/// this on the UI thread.
+fn cargo_target_dirs(app: &Path, env: Option<&std::ffi::OsStr>) -> Vec<PathBuf> {
+    let mut dirs = Vec::new();
+    if let Some(dir) = env.filter(|dir| !dir.is_empty()) {
+        let dir = resolved(app, PathBuf::from(dir));
+        if !dirs.contains(&dir) {
+            dirs.push(dir);
+        }
+    }
+    let mut here = Some(app);
+    for _ in 0..32 {
+        let Some(dir) = here else { break };
+        if let Some(target) = cargo_config_target(&dir.join(".cargo")) {
+            let target = resolved(dir, target);
+            if !dirs.contains(&target) {
+                dirs.push(target);
+            }
+            break;
+        }
+        here = dir.parent();
+    }
+    let default = app.join("target");
+    if !dirs.contains(&default) {
+        dirs.push(default);
+    }
+    dirs
+}
+
+/// A relative Cargo target dir from `base`, or the absolute one as it is.
+fn resolved(base: &Path, dir: PathBuf) -> PathBuf {
+    if dir.is_absolute() { dir } else { base.join(dir) }
+}
+
+/// `build.target-dir` from a folder's Cargo config, when it sets one.
+fn cargo_config_target(cargo_dir: &Path) -> Option<PathBuf> {
+    ["config.toml", "config"].iter().find_map(|name| {
+        let text = std::fs::read_to_string(cargo_dir.join(name)).ok()?;
+        let config: toml::Table = text.parse().ok()?;
+        config.get("build")?.get("target-dir")?.as_str().map(PathBuf::from)
+    })
 }
 
 /// Libraries that put a window on screen: a package using one makes the program to start.
@@ -302,5 +356,46 @@ mod launch_tests {
         std::fs::create_dir_all(binary.parent().unwrap()).unwrap();
         std::fs::write(&binary, "").unwrap();
         assert_eq!(launch(relative, None), Some((cwd.join(binary), vec![root])));
+    }
+}
+
+#[cfg(test)]
+mod target_dir_tests {
+    use super::*;
+    use std::ffi::OsStr;
+
+    fn config(dir: &Path, body: &str) {
+        std::fs::create_dir_all(dir.join(".cargo")).unwrap();
+        std::fs::write(dir.join(".cargo/config.toml"), body).unwrap();
+    }
+
+    #[test]
+    fn target_dirs_follow_the_environment_then_the_project_setting() {
+        let d = tempfile::tempdir().unwrap();
+        let app = d.path().join("app");
+        std::fs::create_dir_all(&app).unwrap();
+        assert_eq!(cargo_target_dirs(&app, None), vec![app.join("target")], "the default");
+        let env = OsStr::new("env-out");
+        assert_eq!(cargo_target_dirs(&app, Some(env)), vec![app.join("env-out"), app.join("target")], "the environment wins");
+        let absolute = d.path().join("absolute");
+        assert_eq!(cargo_target_dirs(&app, Some(absolute.as_os_str())), vec![absolute, app.join("target")], "an absolute environment path stays as it is");
+        config(&app, "[build]\ntarget-dir = \"out\"\n");
+        assert_eq!(cargo_target_dirs(&app, None), vec![app.join("out"), app.join("target")], "the project's setting");
+        assert_eq!(
+            cargo_target_dirs(&app, Some(env)),
+            vec![app.join("env-out"), app.join("out"), app.join("target")],
+            "the environment comes before the project's setting"
+        );
+    }
+
+    #[test]
+    fn target_dirs_read_an_ancestor_setting_when_the_closer_one_has_none() {
+        let d = tempfile::tempdir().unwrap();
+        let workspace = d.path().join("workspace");
+        let app = workspace.join("app");
+        std::fs::create_dir_all(&app).unwrap();
+        config(&app, "[build]\nother = 1\n");
+        config(&workspace, "[build]\ntarget-dir = \"out\"\n");
+        assert_eq!(cargo_target_dirs(&app, None), vec![workspace.join("out"), app.join("target")], "the closest setting wins");
     }
 }

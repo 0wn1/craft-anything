@@ -262,6 +262,30 @@ fn built_program_finds_the_cargo_output_only() {
     assert_eq!(built_program(d.path()), Some(debug.join(exe("snake"))));
 }
 
+/// R5.7: a project that moves Cargo's output writes its program where the config says, not in
+/// `target/`; Play and the checks must look there.
+#[test]
+fn built_program_follows_cargos_moved_target_directory() {
+    let d = tempfile::tempdir().unwrap();
+    let app = d.path();
+    std::fs::create_dir_all(app.join(".cargo")).unwrap();
+    std::fs::write(app.join(".cargo/config.toml"), "[build]\ntarget-dir = \"out\"\n").unwrap();
+    std::fs::write(app.join("Cargo.toml"), "[package]\nname = \"probe\"\n").unwrap();
+    std::fs::create_dir_all(app.join("src")).unwrap();
+    std::fs::write(app.join("src/main.rs"), "fn main() {}\n").unwrap();
+    let debug = app.join("out").join("debug");
+    std::fs::create_dir_all(&debug).unwrap();
+    let exe = if cfg!(windows) { "probe.exe" } else { "probe" };
+    let program = debug.join(exe);
+    std::fs::write(&program, "x").unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    assert_eq!(built_program(app), Some(program));
+}
+
 #[test]
 fn play_starts_the_window_app_of_a_workspace_not_its_newest_program() {
     // Play started the CLI a workspace also built (it was newer), which printed help and quit
