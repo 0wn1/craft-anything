@@ -1534,6 +1534,12 @@ Gaps found while using the app for real projects.
 - [x] The shared investigation chat (`SharedConversation`) doesn't continue a Deep chat's agent
       session once the chat is in Clean room; Clean room to Deep still continues — claimed: rmsff,
       branch fix/r2.9-shared-chat-mode
+- [ ] A session that opens a second project keeps the first project's evidence and open questions:
+      `open_project` adds the new project's records to the session ledger without clearing the old,
+      so `core_evidence_show`, a report and the evidence ledger mix two projects. Opening a
+      different project should start from its own store; reopening the same project should still
+      refresh it
+      — claimed: AlexJoaquimPereira, branch bugfix/r2.9-project-evidence-switch
 - [x] A Clean room build or question must also not resume an API backend's kept transcript:
       `ws.transcript_path()` is loaded whenever it exists, so switching modes can carry what a Deep
       API build read. Clear it, or record its mode, when the mode changes; add a regression
