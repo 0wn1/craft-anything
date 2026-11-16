@@ -2661,6 +2661,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-wasm-metadata-limits-20261110
 - [x] Accept only valid WebAssembly names when reporting custom-section debug and source map URLs.
       — claimed: Afloat16, branch bugfix/r3.12-wasm-debug-names
+- [ ] Find source map annotations after every ECMAScript line terminator.
+      — claimed: Plastic-time, branch bugfix/r3.12-sourcemap-line-endings
 - [x] Decode the full signed 32-bit source map VLQ range and refuse mapping fields outside it.
       — claimed: Afloat16, branch bugfix/r3.12-sourcemap-vlq-range
 - [x] Reject source map mappings with missing source or name entries.
