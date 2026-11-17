@@ -2658,7 +2658,7 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-source-map-data-url-fragment
 - [x] Apply WebAssembly name and producer inventory limits across repeated custom sections and report truncation.
       — claimed: Afloat16, branch bugfix/r3.12-wasm-custom-inventory-budget-20261109
-- [ ] List top-level WebAssembly component sections without counting embedded module sections as component sections.
+- [x] List top-level WebAssembly component sections without counting embedded module sections as component sections.
       — claimed: Plastic-time, branch bugfix/r3.12-wasm-component-layout
 - [x] Bound bytes retained when WebAssembly types and function names are expanded through references, reuse formatted type signatures, and disclose omitted derived metadata.
       — claimed: Afloat16, branch bugfix/r3.12-wasm-reference-bytes-20261110
