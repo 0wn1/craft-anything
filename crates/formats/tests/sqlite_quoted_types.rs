@@ -28,3 +28,24 @@ fn leaves_quoted_int_as_a_stored_primary_key() {
     let db = SqliteDb::parse(&bytes).unwrap();
     assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Int(7)]);
 }
+
+/// A suffix keeps the primary key stored even when SQLite displays the type as INTEGER.
+#[test]
+fn preserves_null_keys_when_the_quoted_integer_type_has_a_suffix() {
+    for declaration in [r#"id "INTEGER"(10) PRIMARY KEY"#, r#"id "INTEGER" EXTRA PRIMARY KEY"#, r#"id "INTEGER"(10), PRIMARY KEY (id)"#] {
+        let sql = format!("CREATE TABLE t({declaration})");
+        let bytes = table_db(&sql, &[(42, vec![Val::Null])]);
+        let db = SqliteDb::parse(&bytes).unwrap();
+        assert_eq!(db.find_object("t").unwrap().columns[0].type_name, "INTEGER", "{declaration}");
+        assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Null], "{declaration}");
+    }
+}
+
+/// A comment and column constraint can follow a quoted INTEGER used by a table-level key.
+#[test]
+fn keeps_quoted_integer_aliases_with_constraints_before_a_table_key() {
+    let sql = r#"CREATE TABLE t(id "INTEGER" /* type */ COLLATE BINARY, PRIMARY KEY (id))"#;
+    let bytes = table_db(sql, &[(42, vec![Val::Null])]);
+    let db = SqliteDb::parse(&bytes).unwrap();
+    assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Int(42)]);
+}
