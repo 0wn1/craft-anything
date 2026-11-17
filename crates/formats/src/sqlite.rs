@@ -1741,7 +1741,11 @@ fn take_identifier(seg: &str) -> (String, &str) {
 
 /// The type name is the run of tokens before the first column-constraint keyword. A comma inside
 /// the type's parentheses belongs to it (`DECIMAL(10, 2)`); only the column separator is dropped.
+/// If the type starts with a quoted name, SQLite uses the contents of that quoted token.
 fn extract_type(rest: &str) -> String {
+    if rest.starts_with(['"', '`', '\'', '[']) {
+        return take_identifier(rest).0;
+    }
     let mut out = String::new();
     let mut depth = 0i32;
     for tok in rest.split_whitespace() {
