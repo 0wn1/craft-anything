@@ -3058,6 +3058,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.13-har-bom-bounds-20261107
 - [x] Resume scanning after an HTML comment that a browser closes with `--!>` or an abrupt empty end.
       — claimed: Plastic-time, branch bugfix/r3.13-html-comment-endings
+- [ ] Skip bogus HTML comments opened by unknown declarations and malformed end tags before listing scripts or preloads.
+      — claimed: Plastic-time, branch bugfix/r3.13-html-bogus-comments
 - [x] The HTML scanner finds script preloads in `rel` token lists, decodes asset URLs once (numeric
       and named references), keeps script and title text through lookalike closing tags, and skips
       raw-text elements, markup inside attribute values and custom tag names such as
