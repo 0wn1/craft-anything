@@ -1342,6 +1342,7 @@ dependencies = [
  "craft-elf",
  "craft-macho",
  "craft-mime",
+ "craft-pe",
  "craft-plist",
  "lzma-rs",
  "miniz_oxide 0.8.9",
@@ -1521,6 +1522,15 @@ dependencies = [
  "chrono",
  "craft-codepage",
  "encoding_rs",
+]
+
+[[package]]
+name = "craft-pe"
+version = "0.1.0"
+source = "git+https://github.com/storytold/craft-libs?rev=83cb1133dd2bdd0d655ba2300f88863f0f53db0b#83cb1133dd2bdd0d655ba2300f88863f0f53db0b"
+dependencies = [
+ "serde",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
