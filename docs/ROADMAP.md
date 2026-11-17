@@ -854,10 +854,11 @@ yet, and the quick start is how every new person begins.
       (`<name>.d`) names the app's sources, and start an older pin from its own copy only. Done:
       the newest of the project's own builds is started; an older pin looks only inside its copy
       — claimed: Fadlalla-ai, branch bugfix/r5.7-pin-own-program
-- [ ] A saved Live pin (made before they were retired) starts the project's own app, not a copy,
+- [x] A saved Live pin (made before they were retired) starts the project's own app, not a copy,
       but since the line above it looks only inside that folder: with the build in
       `CARGO_TARGET_DIR` or a target directory set above the project it says there's nothing to
-      start. Keep the inside-only lookup for pins that keep a copy
+      start. Keep the inside-only lookup for pins that keep a copy. Done: a Live pin finds the
+      build as Play's file lookup does; frozen and light pins still look only in their copy
       — claimed: Fadlalla-ai, branch bugfix/r5.7-live-pin-external-build
 - [ ] Build the new DMG on a Mac (release dry run) and look at the window once
 - [ ] #490 on macOS: a real Deep build through Claude Code with the published 0.3.0 CLI, with
