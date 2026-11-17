@@ -722,7 +722,8 @@ pub fn manifest(doc: &Document) -> Manifest {
             _ => {}
         }
     }
-    let target: Option<u32> = m.target_sdk.as_deref().and_then(|s| s.parse().ok());
+    // An omitted target defaults to the declared minimum SDK.
+    let target: Option<u32> = m.target_sdk.as_deref().or(m.min_sdk.as_deref()).and_then(|s| s.parse().ok());
     for c in &mut m.components {
         // Providers were exported by default up to API 16, intent filters or not.
         let implied = if c.kind == "provider" { target.is_none_or(|t| t <= 16) } else { !c.intent_filters.is_empty() && target.is_none_or(|t| t < 31) };
