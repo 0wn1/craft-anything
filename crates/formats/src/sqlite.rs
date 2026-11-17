@@ -1204,7 +1204,7 @@ fn rowid_alias_index(sql: &str) -> Option<usize> {
     if tail.windows(2).any(|w| w.first().is_some_and(|t| is(t, "WITHOUT")) && w.get(1).is_some_and(|t| is(t, "ROWID"))) {
         return None;
     }
-    let columns = parse_create_columns(sql);
+    let columns = column_definitions(sql);
     let mut key = None;
     let mut column = 0usize;
     let body_start = open.saturating_add(1);
@@ -1228,7 +1228,7 @@ fn rowid_alias_index(sql: &str) -> Option<usize> {
                     return None;
                 }
                 let (name, _) = take_identifier(members.first()?);
-                key = Some(columns.iter().position(|c| c.name.eq_ignore_ascii_case(&name))?);
+                key = Some(columns.iter().position(|(column, _)| column.name.eq_ignore_ascii_case(&name))?);
             } else if !segment.first().is_some_and(|t| ["UNIQUE", "CHECK", "FOREIGN"].iter().any(|word| is(t, word))) {
                 let mut nesting = 0usize;
                 for (j, t) in segment.iter().enumerate().skip(1) {
@@ -1255,7 +1255,13 @@ fn rowid_alias_index(sql: &str) -> Option<usize> {
         }
     }
     let index = key?;
-    columns.get(index)?.type_name.eq_ignore_ascii_case("INTEGER").then_some(index)
+    let (column, declaration) = columns.get(index)?;
+    // SQLite can display a quoted type such as `"INTEGER"(10)` as `INTEGER`. Rowid
+    // aliases require the complete type to be a single exact INTEGER token.
+    if !column.type_name.eq_ignore_ascii_case("INTEGER") {
+        return None;
+    }
+    sql_tokens(declaration).get(1).is_none_or(|token| starts_column_constraint(token)).then_some(index)
 }
 
 /// Keep quoted text intact so defaults and constraint names cannot become SQL keywords.
@@ -1741,18 +1747,16 @@ fn take_identifier(seg: &str) -> (String, &str) {
 
 /// The type name is the run of tokens before the first column-constraint keyword. A comma inside
 /// the type's parentheses belongs to it (`DECIMAL(10, 2)`); only the column separator is dropped.
+/// If the type starts with a quoted name, SQLite uses the contents of that quoted token.
 fn extract_type(rest: &str) -> String {
+    if rest.starts_with(['"', '`', '\'', '[']) {
+        return take_identifier(rest).0;
+    }
     let mut out = String::new();
     let mut depth = 0i32;
     for tok in rest.split_whitespace() {
         let bare = tok.trim_end_matches(',');
-        let upper = bare.to_ascii_uppercase();
-        if depth == 0
-            && matches!(
-                upper.as_str(),
-                "PRIMARY" | "NOT" | "NULL" | "UNIQUE" | "CHECK" | "DEFAULT" | "COLLATE" | "REFERENCES" | "GENERATED" | "AS" | "CONSTRAINT" | "AUTOINCREMENT"
-            )
-        {
+        if depth == 0 && starts_column_constraint(bare) {
             break;
         }
         depth += tok.matches('(').count() as i32;
@@ -1763,6 +1767,14 @@ fn extract_type(rest: &str) -> String {
         out.push_str(if depth == 0 { bare } else { tok });
     }
     out
+}
+
+/// Keywords that end a declared type and begin column constraints.
+fn starts_column_constraint(token: &str) -> bool {
+    matches!(
+        token.to_ascii_uppercase().as_str(),
+        "PRIMARY" | "NOT" | "NULL" | "UNIQUE" | "CHECK" | "DEFAULT" | "COLLATE" | "REFERENCES" | "GENERATED" | "AS" | "CONSTRAINT" | "AUTOINCREMENT"
+    )
 }
 
 #[cfg(test)]
