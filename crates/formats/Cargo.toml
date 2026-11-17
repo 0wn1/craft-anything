@@ -12,6 +12,7 @@ workspace = true
 [dependencies]
 craft-pe = { workspace = true }
 craft-elf = { workspace = true }
+craft-macho = { workspace = true }
 craft-mime = { workspace = true }
 craft-plist = { workspace = true }
 thiserror = { workspace = true }
