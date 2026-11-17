@@ -2154,7 +2154,7 @@ Owner: open · Status: in progress
       — claimed: Plastic-time, branch bugfix/r3.12-js-constant-text-budget
 - [x] Read `.cts` files as CommonJS and `.mts` files as ES modules, as Node and TypeScript do, instead of guessing from the syntax.
       — claimed: Plastic-time, branch bugfix/r3.12-js-cts-commonjs
-- [ ] Reject physical line breaks in regular GraphQL strings, including after a backslash.
+- [x] Reject physical line breaks in regular GraphQL strings, including after a backslash.
       — claimed: Plastic-time, branch bugfix/r3.12-graphql-string-line-breaks
 - [x] Keep escaped triple quotes inside GraphQL block strings when reading operations.
       — claimed: Plastic-time, branch bugfix/r3.12-graphql-block-strings
