@@ -203,7 +203,8 @@ pub fn enrich(data: &[u8], b: &mut Binary) {
     let mut thread_pc = None;
     let mut fstarts = None;
     let mut cmds_json = Vec::new();
-    let mut libs = Vec::new();
+    // Preserve each dependency's ordinal even when its load command has no usable path.
+    let mut dylib_ordinals = Vec::new();
     for _ in 0..ncmds.min(MAX_CMDS) {
         if pos.checked_add(8).is_none_or(|end| end > limit) {
             b.warnings.push("load command header runs past sizeofcmds; stopped".into());
@@ -226,7 +227,11 @@ pub fn enrich(data: &[u8], b: &mut Binary) {
             cmds_json.push(json!({"cmd": load_command_name(cmd), "size": size}));
         }
         let minimum = load_command_min_size(cmd);
+        let is_dylib = matches!(cmd, 0xc | 0x20 | 0x8000_0018 | 0x8000_001f | 0x8000_0023);
         if size < minimum {
+            if is_dylib {
+                dylib_ordinals.push(None);
+            }
             b.warnings.push(format!("{} needs at least {minimum} bytes; skipped its fields", load_command_name(cmd)));
             pos = end;
             continue;
@@ -237,7 +242,7 @@ pub fn enrich(data: &[u8], b: &mut Binary) {
             if o < minimum || o >= size {
                 return None;
             }
-            r.cstr(pos + o, size - o)
+            Some(std::ffi::CStr::from_bytes_until_nul(r.slice(pos + o, size - o)?).ok()?.to_string_lossy().into_owned())
         };
         match cmd {
             0x19 | 0x1 => {
@@ -274,11 +279,7 @@ pub fn enrich(data: &[u8], b: &mut Binary) {
                     Some((r.u32_le(pos + 8).unwrap_or(0), r.u32_le(pos + 12).unwrap_or(0), r.u32_le(pos + 16).unwrap_or(0), r.u32_le(pos + 20).unwrap_or(0)))
             }
             0xb => indirect = Some((r.u32_le(pos + 56).unwrap_or(0), r.u32_le(pos + 60).unwrap_or(0))),
-            0xc | 0x20 | 0x8000_0018 | 0x8000_001f | 0x8000_0023 => {
-                if let Some(s) = str_at(8) {
-                    libs.push(s);
-                }
-            }
+            _ if is_dylib => dylib_ordinals.push(str_at(8)),
             0xd => {
                 if let Some(s) = str_at(8) {
                     b.info.insert("install_name".into(), s);
@@ -328,7 +329,6 @@ pub fn enrich(data: &[u8], b: &mut Binary) {
         }
         pos = end;
     }
-    b.libraries = libs;
     if b.mitigations.code_signature.is_none() {
         b.mitigations.code_signature = Some(false);
     }
@@ -415,12 +415,12 @@ pub fn enrich(data: &[u8], b: &mut Binary) {
                 }
                 let Some((name, desc)) = sym_name(sym) else { continue };
                 let ord = usize::from(desc >> 8);
-                let library = if ord > 0 && ord < 0xfe { b.libraries.get(ord - 1).cloned() } else { None };
+                let library = if ord > 0 && ord < 0xfe { dylib_ordinals.get(ord - 1).cloned().flatten() } else { None };
                 b.import_slots.push(ImportSlot { addr: s.addr.wrapping_add(i as u64 * entsize), name, library, kind });
             }
         }
     }
-    // Libraries for imports, by two-level namespace ordinal.
+    b.libraries = dylib_ordinals.into_iter().flatten().collect();
     b.details = json!({
         "file_type": match r.u32_le(12) { Some(1) => "object", Some(2) => "execute", Some(6) => "dylib", Some(8) => "bundle", Some(4) => "core", _ => "other" },
         "flags": format!("{header_flags:#x}"),
