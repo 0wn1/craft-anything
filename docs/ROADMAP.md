@@ -2768,7 +2768,7 @@ Owner: open · Status: in progress
       no-space annotation is found, tabs and repeated spaces are accepted, and a URL containing
       whitespace is rejected, on the parsed and lexer paths alike.
       — claimed: AlexJoaquimPereira, branch bugfix/r3.12-js-sourcemap-annotation
-- [ ] Require the full PE signature at the DOS extended-header offset.
+- [x] Require the full PE signature at the DOS extended-header offset.
       — claimed: Plastic-time, branch bugfix/r3.12-dos-extended-pe-signature
 - [x] Keep DOS relocations inside the declared executable header.
       — claimed: Afloat16, branch bugfix/r3.12-dos-relocation-header-boundary-20261105
