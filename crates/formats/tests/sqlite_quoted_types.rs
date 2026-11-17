@@ -44,8 +44,49 @@ fn preserves_null_keys_when_the_quoted_integer_type_has_a_suffix() {
 /// A comment and column constraint can follow a quoted INTEGER used by a table-level key.
 #[test]
 fn keeps_quoted_integer_aliases_with_constraints_before_a_table_key() {
-    let sql = r#"CREATE TABLE t(id "INTEGER" /* type */ COLLATE BINARY, PRIMARY KEY (id))"#;
+    let sql = r#"CREATE TABLE t(id /* before type */ "INTEGER" /* after type */ COLLATE BINARY, PRIMARY KEY (id))"#;
     let bytes = table_db(sql, &[(42, vec![Val::Null])]);
     let db = SqliteDb::parse(&bytes).unwrap();
+    assert_eq!(db.find_object("t").unwrap().columns[0].type_name, "INTEGER");
     assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Int(42)]);
+}
+
+/// SQLite treats GENERATED as part of the type when it appears as a lone type word.
+#[test]
+fn keeps_a_stored_null_with_generated_as_a_type_word() {
+    let sql = r#"CREATE TABLE t(id "INTEGER" GENERATED PRIMARY KEY)"#;
+    let bytes = table_db(sql, &[(42, vec![Val::Null])]);
+    let db = SqliteDb::parse(&bytes).unwrap();
+    assert_eq!(db.find_object("t").unwrap().columns[0].type_name, "INTEGER");
+    assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Null]);
+}
+
+/// Deferral clauses leave a quoted INTEGER primary key eligible to alias the rowid.
+#[test]
+fn keeps_rowid_aliases_after_deferral_clauses() {
+    for declaration in [r#"id "INTEGER" DEFERRABLE PRIMARY KEY"#, r#"id "INTEGER" NOT DEFERRABLE, PRIMARY KEY (id)"#] {
+        let sql = format!("CREATE TABLE t({declaration})");
+        let bytes = table_db(&sql, &[(42, vec![Val::Null])]);
+        let db = SqliteDb::parse(&bytes).unwrap();
+        assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Int(42)], "{declaration}");
+    }
+}
+
+/// SQLite trims a redundant ALWAYS suffix from a long enough declared type.
+#[test]
+fn keeps_the_alias_when_sqlite_trims_an_always_suffix() {
+    for declaration in [r#"id "INTEGER" ALWAYS PRIMARY KEY"#, r#"id "INTEGER" GENERATED ALWAYS, PRIMARY KEY (id)"#] {
+        let sql = format!("CREATE TABLE t({declaration})");
+        let bytes = table_db(&sql, &[(42, vec![Val::Null])]);
+        let db = SqliteDb::parse(&bytes).unwrap();
+        assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Int(42)], "{declaration}");
+    }
+}
+
+/// A bracketed type with a suffix is dequoted across the full type span.
+#[test]
+fn reads_the_full_span_for_bracketed_types_with_suffixes() {
+    let columns = parse_create_columns("CREATE TABLE t(id [INTEGER] EXTRA PRIMARY KEY, amount [NUMERIC](10, 2))");
+    assert_eq!(columns[0].type_name, "INTEGER] EXTR");
+    assert_eq!(columns[1].type_name, "NUMERIC](10, 2");
 }
