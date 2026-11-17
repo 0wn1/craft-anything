@@ -26,8 +26,8 @@ pub struct HtmlFacts {
     pub title: Option<String>,
 }
 
-/// Attributes of the tag starting at `start` (just after the tag name). Returns (attrs, end of tag).
-fn attributes(src: &str, lower: &str, mut i: usize) -> (Vec<(String, String)>, usize) {
+/// Attributes and end offset of a complete tag, starting just after its name.
+fn attributes(src: &str, lower: &str, mut i: usize) -> Option<(Vec<(String, String)>, usize)> {
     let b = lower.as_bytes();
     let mut out = Vec::new();
     while i < b.len() {
@@ -36,7 +36,7 @@ fn attributes(src: &str, lower: &str, mut i: usize) -> (Vec<(String, String)>, u
         }
         match b.get(i) {
             None => break,
-            Some(b'>') => return (out, i + 1),
+            Some(b'>') => return Some((out, i + 1)),
             _ => {}
         }
         let ns = i;
@@ -79,7 +79,7 @@ fn attributes(src: &str, lower: &str, mut i: usize) -> (Vec<(String, String)>, u
             out.push((name, decode_entities(&value)));
         }
     }
-    (out, i.min(b.len()))
+    None
 }
 
 fn decode_entities(s: &str) -> String {
@@ -174,7 +174,7 @@ pub fn scan_html(src: &str) -> HtmlFacts {
         let after = at + 1 + name.len();
         match name {
             "script" => {
-                let (attrs, end) = attributes(src, &lower, after);
+                let Some((attrs, end)) = attributes(src, &lower, after) else { break };
                 let close = closing_tag(&lower, end, "script").unwrap_or(lower.len());
                 let module = get(&attrs, "type").is_some_and(|t| t.eq_ignore_ascii_case("module"));
                 let line = lines.line(u32::try_from(at).unwrap_or(u32::MAX));
@@ -188,12 +188,12 @@ pub fn scan_html(src: &str) -> HtmlFacts {
                 pos = close.max(end).max(at + 1);
             }
             "style" | "textarea" | "xmp" | "iframe" | "noembed" | "noframes" => {
-                let (_, end) = attributes(src, &lower, after);
+                let Some((_, end)) = attributes(src, &lower, after) else { break };
                 pos = closing_tag(&lower, end, name).unwrap_or(lower.len()).max(at + 1);
             }
             "plaintext" => break,
             "link" => {
-                let (attrs, end) = attributes(src, &lower, after);
+                let Some((attrs, end)) = attributes(src, &lower, after) else { break };
                 let rel_attr = get(&attrs, "rel").unwrap_or("").to_ascii_lowercase();
                 let script_destination = get(&attrs, "as").is_some_and(|value| value.eq_ignore_ascii_case("script"));
                 if rel_attr.split_ascii_whitespace().any(|token| token == "modulepreload" || (token == "preload" && script_destination))
@@ -205,14 +205,14 @@ pub fn scan_html(src: &str) -> HtmlFacts {
                 pos = end.max(at + 1);
             }
             "meta" => {
-                let (attrs, end) = attributes(src, &lower, after);
+                let Some((attrs, end)) = attributes(src, &lower, after) else { break };
                 if get(&attrs, "http-equiv").is_some_and(|h| h.eq_ignore_ascii_case("content-security-policy")) {
                     out.csp = get(&attrs, "content").map(String::from);
                 }
                 pos = end.max(at + 1);
             }
             "title" => {
-                let (_, end) = attributes(src, &lower, after);
+                let Some((_, end)) = attributes(src, &lower, after) else { break };
                 let close = closing_tag(&lower, end, "title").unwrap_or(lower.len());
                 out.title = src.get(end..close).map(|t| decode_entities(t).trim().chars().take(200).collect());
                 pos = close.max(at + 1);
@@ -229,7 +229,7 @@ pub fn scan_html(src: &str) -> HtmlFacts {
             _ if rest.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
                 || rest.strip_prefix('/').and_then(|s| s.as_bytes().first()).is_some_and(u8::is_ascii_alphabetic) =>
             {
-                let (_, end) = attributes(src, &lower, after);
+                let Some((_, end)) = attributes(src, &lower, after) else { break };
                 pos = end.max(at + 1);
             }
             _ => pos = at + 1,
