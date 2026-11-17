@@ -224,10 +224,10 @@ fn skip_string(chars: &mut std::iter::Peekable<std::str::CharIndices<'_>>, text:
     let mut escaped = false;
     for (_, c) in chars.by_ref() {
         match c {
+            '\r' | '\n' => return None,
             _ if escaped => escaped = false,
             '\\' => escaped = true,
             '"' => return Some(()),
-            '\n' => return None,
             _ => {}
         }
     }
