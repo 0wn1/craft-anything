@@ -1345,6 +1345,7 @@ dependencies = [
  "craft-pe",
  "craft-plist",
  "craft-sourcemap",
+ "craft-tar",
  "lzma-rs",
  "miniz_oxide 0.8.9",
  "object 0.36.7",
@@ -1555,6 +1556,14 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.21",
+]
+
+[[package]]
+name = "craft-tar"
+version = "0.1.0"
+source = "git+https://github.com/storytold/craft-libs?rev=42bb9d35bba5c1074cce44fbc157785f3d29ad90#42bb9d35bba5c1074cce44fbc157785f3d29ad90"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

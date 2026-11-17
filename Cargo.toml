@@ -28,6 +28,8 @@ craft-anything-testkit = { path = "crates/testkit" }
 # external
 # Shared unwrapped standard Base64 encoding; decoding keeps format-specific validation.
 craft-mime = { git = "https://github.com/storytold/craft-libs", rev = "de97c35f2b2af01c62371647e57a6affeab456fd" }
+# Shared bounded TAR/CPIO listing, including current compatibility fixes.
+craft-tar = { git = "https://github.com/storytold/craft-libs", rev = "42bb9d35bba5c1074cce44fbc157785f3d29ad90", features = ["serde"] }
 # XML plist reader; prerequisite craft-libs #1633 (repin after merge).
 craft-elf = { git = "https://github.com/storytold/craft-libs", rev = "fd91be74f078d7062945ff6512cf65afea0c73ac", features = ["serde"] }
 craft-pe = { git = "https://github.com/storytold/craft-libs", rev = "83cb1133dd2bdd0d655ba2300f88863f0f53db0b", features = ["serde"] }
