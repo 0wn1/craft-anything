@@ -2834,7 +2834,7 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-firmware-zip-extent-20261110
 - [x] Exercise signed PAX lengths, empty keys and equals signs inside a path value.
       — claimed: Afloat16, branch bugfix/r3.12-pax-record-framing
-- [ ] Apply valid PAX size overrides before reading the TAR member's legacy size field.
+- [x] Apply valid PAX size overrides before reading the TAR member's legacy size field.
       — claimed: Plastic-time, branch bugfix/r3.12-tar-pax-size-precedence
 - [x] Reject invalid local PAX sizes before listing the affected TAR member.
       — claimed: Plastic-time, branch bugfix/r3.12-tar-local-pax-size-1112
