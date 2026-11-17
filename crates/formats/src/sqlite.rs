@@ -1026,27 +1026,22 @@ fn without_rowid_order(table: &SchemaObject) -> Option<Vec<Option<usize>>> {
     let mut seen_keys = BTreeSet::new();
     for segment in split_top_level(body) {
         let tokens = sql_tokens(segment);
-        let Some(pk) = tokens
-            .windows(2)
-            .position(|pair| pair.first().is_some_and(|s| s.eq_ignore_ascii_case("PRIMARY")) && pair.get(1).is_some_and(|s| s.eq_ignore_ascii_case("KEY")))
-        else {
+        if !tokens.windows(2).any(|pair| pair[0].eq_ignore_ascii_case("PRIMARY") && pair[1].eq_ignore_ascii_case("KEY")) {
             continue;
-        };
+        }
         let table_constraint = tokens.first().is_some_and(|s| s.eq_ignore_ascii_case("PRIMARY") || s.eq_ignore_ascii_case("CONSTRAINT"));
-        let terms: Vec<&[&str]> = if table_constraint {
-            let tail = tokens.get(pk.checked_add(3)?..)?;
-            let end = tail.iter().position(|s| *s == ")")?;
-            tail.get(..end)?.split(|s| *s == ",").collect()
+        let terms: Vec<Vec<&str>> = if table_constraint {
+            let open = column_list_open(segment)?;
+            let close = column_list_close(segment)?;
+            split_top_level(segment.get(open.checked_add(1)?..close)?).into_iter().map(sql_tokens).collect()
         } else {
-            vec![tokens.get(..1)?]
+            vec![vec![*tokens.first()?]]
         };
-        for term in terms {
-            let Some((token, modifiers)) = term.split_first() else { continue };
+        for term in terms.iter().filter(|term| !term.is_empty()) {
+            let (token, collation) = primary_key_column(term)?;
             let (name, _) = take_identifier(token);
             let position = table.columns.iter().position(|column| column.name.eq_ignore_ascii_case(&name))?;
-            let collation = top_level_collation(modifiers)
-                .or_else(|| definitions.get(position).and_then(|(_, rest)| top_level_collation(&sql_tokens(rest))))
-                .unwrap_or("BINARY");
+            let collation = collation.or_else(|| definitions.get(position).and_then(|(_, rest)| top_level_collation(&sql_tokens(rest)))).unwrap_or("BINARY");
             // SQLite retains repeated terms when they use different collations.
             if seen_keys.insert((position, take_identifier(collation).0.to_ascii_lowercase())) {
                 stored.push(position);
@@ -1062,6 +1057,28 @@ fn without_rowid_order(table: &SchemaObject) -> Option<Vec<Option<usize>>> {
         }
     }
     (0..table.columns.len()).map(|i| if is_virtual(i) { Some(None) } else { stored.iter().position(|&column| column == i).map(Some) }).collect()
+}
+
+/// Read a primary-key column and its outermost COLLATE, if given.
+fn primary_key_column<'a>(term: &[&'a str]) -> Option<(&'a str, Option<&'a str>)> {
+    let mut tokens = term.iter().copied();
+    let mut depth = 0usize;
+    let name = loop {
+        match tokens.next()? {
+            "(" => depth += 1,
+            name => break name,
+        }
+    };
+    let mut collation = None;
+    while let Some(token) = tokens.next() {
+        match token {
+            ")" => depth = depth.checked_sub(1)?,
+            _ if token.eq_ignore_ascii_case("COLLATE") => collation = Some(tokens.next()?),
+            _ if depth == 0 && (token.eq_ignore_ascii_case("ASC") || token.eq_ignore_ascii_case("DESC")) && tokens.next().is_none() => break,
+            _ => return None,
+        }
+    }
+    (depth == 0).then_some((name, collation))
 }
 
 /// Find the applicable COLLATE clause without looking inside expressions such as CHECK.
