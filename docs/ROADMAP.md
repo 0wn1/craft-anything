@@ -3038,6 +3038,8 @@ Owner: open · Status: in progress
 
 - [x] Require call syntax for tRPC client hooks in JavaScript lexer fallback facts.
       — claimed: Plastic-time, branch bugfix/r3.12-trpc-calls-1116
+- [x] Keep literal dynamic imports with options or a trailing comma in JavaScript lexer fallback facts.
+      — claimed: Plastic-time, branch bugfix/r3.12-dynamic-import-options
 - [x] Keep side-effect imports in JavaScript lexer fallback facts.
       — claimed: Plastic-time, branch bugfix/r3.12-js-side-effect-imports-1115
 - [x] Bound the JavaScript lexer fallback's `endpoints` (fetch calls and URL literals) and
