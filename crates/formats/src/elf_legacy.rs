@@ -1,49 +1,13 @@
 // Test-only compatibility oracle retained from elf.rs at acacd13b.
 // Original implementation: Brandon Thomas; overflow hardening: GGWA.
 // MIT OR Apache-2.0, unchanged parser behavior; shared production code lives in craft-elf.
-use crate::bytes::Reader;
 use crate::{FormatError, hex_addr};
 use serde::Serialize;
 const MAX_PHDRS: usize = 4096;
 const MAX_DYN: usize = 65_536;
 
-/// Endian/class-aware reads over an ELF image.
-#[derive(Clone, Copy)]
-struct E<'a> {
-    r: Reader<'a>,
-    is64: bool,
-    le: bool,
-}
-
-impl<'a> E<'a> {
-    fn new(data: &'a [u8]) -> Result<Self, FormatError> {
-        if !data.starts_with(b"\x7fELF") {
-            return Err(FormatError::Malformed("no ELF magic".into()));
-        }
-        let r = Reader::new(data);
-        let class = r.u8(4).ok_or_else(|| FormatError::Truncated("ELF ident".into()))?;
-        let enc = r.u8(5).ok_or_else(|| FormatError::Truncated("ELF ident".into()))?;
-        if !matches!(class, 1 | 2) || !matches!(enc, 1 | 2) {
-            return Err(FormatError::Malformed("bad ELF class or data encoding".into()));
-        }
-        Ok(E { r, is64: class == 2, le: enc == 1 })
-    }
-    fn u16(&self, off: usize) -> Option<u16> {
-        if self.le { self.r.u16_le(off) } else { self.r.u16_be(off) }
-    }
-    fn u32(&self, off: usize) -> Option<u32> {
-        if self.le { self.r.u32_le(off) } else { self.r.u32_be(off) }
-    }
-    fn u64(&self, off: usize) -> Option<u64> {
-        if self.le { self.r.u64_le(off) } else { self.r.u64_be(off) }
-    }
-    fn word(&self, off: usize) -> Option<u64> {
-        if self.is64 { self.u64(off) } else { self.u32(off).map(u64::from) }
-    }
-    fn word_size(&self) -> usize {
-        if self.is64 { 8 } else { 4 }
-    }
-}
+// Reuse the unchanged app byte reader; the shared parser uses its own independent reader.
+use super::E;
 
 /// One program header.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
