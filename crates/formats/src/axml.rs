@@ -615,7 +615,7 @@ pub fn manifest(doc: &Document) -> Manifest {
                         m.target_sdk = sval(a, "targetSdkVersion");
                         m.max_sdk = sval(a, "maxSdkVersion");
                     }
-                    ("manifest", "uses-permission" | "uses-permission-sdk-23") => {
+                    ("manifest", "uses-permission" | "uses-permission-sdk-23" | "uses-permission-sdk-m") => {
                         if let Some(p) = sval(a, "name")
                             && m.uses_permissions.len() < 4096
                         {
