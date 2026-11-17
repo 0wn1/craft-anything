@@ -1696,6 +1696,7 @@ Gaps found while using the app for real projects.
       the cap and the boundary
       — claimed: AlexJoaquimPereira, branch bugfix/r2.9-build-file-read-cap
 - [ ] `build_file_edit` also reads the whole file into memory; cap it the same way
+      — claimed: AlexJoaquimPereira, branch bugfix/r2.9-build-file-edit-cap
 - [x] Choose Claude Code's folder (`CLAUDE_CONFIG_DIR`) per AI, so one computer can build with
       two Claude accounts; an app opened from the Dock never sees the shell's variable. Settings →
       AI (a typed folder, and Add another) and `ai folder`; live-checked from the CLI with an empty
