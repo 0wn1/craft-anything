@@ -2730,7 +2730,7 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-elf-core-file-name-count-cap-20261105
 - [x] Advance ELF core NT_FILE path cursors by complete original byte strings, even when a displayed path is lossy or capped.
       — claimed: Afloat16, branch bugfix/r3.12-elf-core-path-cursor-20261109
-- [ ] Build indexed source-map inventories from the section maps.
+- [x] Build indexed source-map inventories from the section maps.
       — claimed: Plastic-time, branch bugfix/r3.12-indexed-map-source-inventory
 - [x] Validate index source map section offsets and stop an unresolved section from borrowing mappings from the preceding section.
       — claimed: Afloat16, branch bugfix/r3.12-index-map-boundaries
