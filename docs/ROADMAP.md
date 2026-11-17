@@ -3129,6 +3129,13 @@ Owner: open · Status: in progress
       nothing about the rest (#1811; `web_page_show`'s outlines were fixed in #1845): count the kept
       bodies and say how many were left out and why.
       — claimed: htcom-code, branch bugfix/r3.13-body-outline-cap
+- [x] A page that opens an `alert` on load makes `web_site_open` time out (#2010): answer the
+      page's JavaScript dialogs (accept `alert`/`beforeunload`, dismiss `confirm`/`prompt`) and say
+      which ones it opened. — claimed: htcom-code, branch bugfix/r3.13-js-dialog-blocks-open
+- [ ] The tools that connect to a page on their own (`browser_tools.rs`: walkthroughs and
+      `web_page_show`; `web_runtime_tools.rs`; `electron_runtime_tools.rs`) don't answer JavaScript
+      dialogs yet, so a page that opens one mid-run still stalls them: give them
+      `CdpClient::answering_dialogs` and report the dialogs the same way (#2010).
 
 ---
 
