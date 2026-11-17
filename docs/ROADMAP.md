@@ -2273,7 +2273,7 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-capture-evidence
 - [x] Reject impossible IPv4 header and total lengths.
       — claimed: Afloat16, branch bugfix/r3.12-ipv4-header-lengths-20261105
-- [ ] Stop IPv6 transport decoding at No Next Header.
+- [x] Stop IPv6 transport decoding at No Next Header.
       — claimed: Plastic-time, branch bugfix/r3.12-ipv6-no-next-header
 - [x] Validate the version in IPv6 frames.
       — claimed: Afloat16, branch bugfix/r3.12-ipv6-version-20261105
