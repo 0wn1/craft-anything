@@ -1166,7 +1166,7 @@ mod shared_parity {
                     let new = ProgramHeader { offset, file_size: size, ..new.clone() };
                     assert_eq!(legacy::dynamic(&data, &[old]), dynamic_entries(&E::new(&data).unwrap(), &[new]));
                 }
-                assert_eq!(dynamic_entries(&E::new(&data).unwrap(), &[new.clone()]).len(), 65_536);
+                assert_eq!(dynamic_entries(&E::new(&data).unwrap(), std::slice::from_ref(&new)).len(), 65_536);
                 data[64..64 + width].fill(0);
                 assert!(dynamic_entries(&E::new(&data).unwrap(), &[new]).is_empty());
             }
