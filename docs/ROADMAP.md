@@ -2162,6 +2162,8 @@ Owner: open · Status: in progress
       — claimed: Plastic-time, branch bugfix/r3.12-js-numeric-addition
 - [x] Walk past the old GNU sparse extension blocks to list the next TAR member.
       — claimed: Plastic-time, branch bugfix/r3.12-gnu-sparse-extensions
+- [x] Accept the zero checksum placeholder on GNU-style CRC cpio symbolic links.
+      — claimed: Plastic-time, branch bugfix/r3.12-cpio-symlink-crc
 - [x] Refuse oversized GNU tar long names and link targets instead of silently truncating member identities.
       — claimed: Afloat16, branch bugfix/r3.12-tar-long-identities-20261109
       Source [`de2c6390`](https://github.com/Afloat16/craft-anything/commit/de2c63908909cab675887103921ed2601b1bae9b) passed [formats tests, fmt and clippy](https://github.com/Afloat16/claude-mem/actions/runs/42640688213/job/129240669663)
