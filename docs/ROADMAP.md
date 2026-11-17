@@ -3141,10 +3141,17 @@ Owner: open · Status: in progress
 - [x] A page that opens an `alert` on load makes `web_site_open` time out (#2010): answer the
       page's JavaScript dialogs (accept `alert`/`beforeunload`, dismiss `confirm`/`prompt`) and say
       which ones it opened. — claimed: htcom-code, branch bugfix/r3.13-js-dialog-blocks-open
-- [ ] The tools that connect to a page on their own (`browser_tools.rs`: walkthroughs and
+- [x] The tools that connect to a page on their own (`browser_tools.rs`: walkthroughs and
       `web_page_show`; `web_runtime_tools.rs`; `electron_runtime_tools.rs`) don't answer JavaScript
       dialogs yet, so a page that opens one mid-run still stalls them: give them
-      `CdpClient::answering_dialogs` and report the dialogs the same way (#2010).
+      `CdpClient::answering_dialogs` and report the dialogs the same way (#2010). Done: they answer
+      the page's dialogs (alerts and leave-page questions accepted, confirm and prompt dismissed)
+      and list each one with its answer in the result and summary; fake-CDP regressions cover
+      `web_page_show`, a walkthrough, coverage measurement, listeners and the module graph.
+      — claimed: AlexJoaquimPereira, branch bugfix/r3.13-page-tools-dialogs
+- [ ] `web_page_js_analyze` and `web_page_watch` still attach to a page without answering its
+      dialogs, as do `web_mcp_tools_list` and `web_page_screenshot_take`: a page that opens one
+      mid-run can still stall them.
 
 ---
 
