@@ -3145,6 +3145,7 @@ Owner: open · Status: in progress
       `web_page_show`; `web_runtime_tools.rs`; `electron_runtime_tools.rs`) don't answer JavaScript
       dialogs yet, so a page that opens one mid-run still stalls them: give them
       `CdpClient::answering_dialogs` and report the dialogs the same way (#2010).
+      — claimed: AlexJoaquimPereira, branch bugfix/r3.13-page-tools-dialogs
 
 ---
 
