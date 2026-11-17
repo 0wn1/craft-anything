@@ -1511,7 +1511,7 @@ dependencies = [
 [[package]]
 name = "craft-har"
 version = "0.1.0"
-source = "git+https://github.com/storytold/craft-libs?rev=626bca1b38b446bc3b04e49743fcf1a6881fa6e9#626bca1b38b446bc3b04e49743fcf1a6881fa6e9"
+source = "git+https://github.com/storytold/craft-libs?rev=6792748feaf14985e2cc97a0e258468621d5c02d#6792748feaf14985e2cc97a0e258468621d5c02d"
 dependencies = [
  "serde_json",
  "thiserror 2.0.21",
