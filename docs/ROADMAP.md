@@ -2667,6 +2667,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.12-wasm-debug-names
 - [x] Find source map annotations after every ECMAScript line terminator.
       — claimed: Plastic-time, branch bugfix/r3.12-sourcemap-line-endings
+- [ ] Read source map hints inside complete trailing block comments with either annotation marker.
+      — claimed: Plastic-time, branch bugfix/r3.12-sourcemap-block-boundaries
 - [x] Decode the full signed 32-bit source map VLQ range and refuse mapping fields outside it.
       — claimed: Afloat16, branch bugfix/r3.12-sourcemap-vlq-range
 - [x] Reject source map mappings with missing source or name entries.
