@@ -1016,12 +1016,14 @@ fn is_strict(sql: &str) -> bool {
 /// Output-column positions in the stored record: PK columns first, then the remaining stored
 /// columns. A VIRTUAL generated column has no field in the record, so its position is `None`.
 fn without_rowid_order(table: &SchemaObject) -> Option<Vec<Option<usize>>> {
-    let generated: Vec<bool> = column_definitions(&table.sql).iter().map(|(_, rest)| is_virtual_column(rest)).collect();
+    let definitions = column_definitions(&table.sql);
+    let generated: Vec<bool> = definitions.iter().map(|(_, rest)| is_virtual_column(rest)).collect();
     let is_virtual = |i: usize| generated.get(i).copied().unwrap_or(false);
     let open = column_list_open(&table.sql)?;
     let close = column_list_close(&table.sql)?;
     let body = table.sql.get(open.checked_add(1)?..close)?;
     let mut stored = Vec::new();
+    let mut seen_keys = BTreeSet::new();
     for segment in split_top_level(body) {
         let tokens = sql_tokens(segment);
         let Some(pk) = tokens
@@ -1031,17 +1033,22 @@ fn without_rowid_order(table: &SchemaObject) -> Option<Vec<Option<usize>>> {
             continue;
         };
         let table_constraint = tokens.first().is_some_and(|s| s.eq_ignore_ascii_case("PRIMARY") || s.eq_ignore_ascii_case("CONSTRAINT"));
-        let names: Vec<&str> = if table_constraint {
+        let terms: Vec<&[&str]> = if table_constraint {
             let tail = tokens.get(pk.checked_add(3)?..)?;
             let end = tail.iter().position(|s| *s == ")")?;
-            tail.get(..end)?.split(|s| *s == ",").filter_map(|part| part.first().copied()).collect()
+            tail.get(..end)?.split(|s| *s == ",").collect()
         } else {
-            vec![*tokens.first()?]
+            vec![tokens.get(..1)?]
         };
-        for token in names {
+        for term in terms {
+            let Some((token, modifiers)) = term.split_first() else { continue };
             let (name, _) = take_identifier(token);
             let position = table.columns.iter().position(|column| column.name.eq_ignore_ascii_case(&name))?;
-            if !stored.contains(&position) {
+            let collation = top_level_collation(modifiers)
+                .or_else(|| definitions.get(position).and_then(|(_, rest)| top_level_collation(&sql_tokens(rest))))
+                .unwrap_or("BINARY");
+            // SQLite retains repeated terms when they use different collations.
+            if seen_keys.insert((position, take_identifier(collation).0.to_ascii_lowercase())) {
                 stored.push(position);
             }
         }
@@ -1055,6 +1062,22 @@ fn without_rowid_order(table: &SchemaObject) -> Option<Vec<Option<usize>>> {
         }
     }
     (0..table.columns.len()).map(|i| if is_virtual(i) { Some(None) } else { stored.iter().position(|&column| column == i).map(Some) }).collect()
+}
+
+/// Find the applicable COLLATE clause without looking inside expressions such as CHECK.
+fn top_level_collation<'a>(tokens: &[&'a str]) -> Option<&'a str> {
+    let mut depth = 0usize;
+    let mut collation = None;
+    let mut tokens = tokens.iter().copied();
+    while let Some(token) = tokens.next() {
+        match token {
+            "(" => depth = depth.saturating_add(1),
+            ")" => depth = depth.saturating_sub(1),
+            _ if depth == 0 && token.eq_ignore_ascii_case("COLLATE") => collation = tokens.next(),
+            _ => {}
+        }
+    }
+    collation
 }
 
 /// A generated column (`AS (expr)`, with or without `GENERATED ALWAYS`) is VIRTUAL unless
