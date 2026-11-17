@@ -117,22 +117,7 @@ pub fn int_json(i: i128) -> Json {
 }
 
 /// Standard base64 with padding.
-pub fn base64(data: &[u8]) -> String {
-    const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut out = String::with_capacity(data.len().div_ceil(3).saturating_mul(4));
-    for chunk in data.chunks(3) {
-        let b0 = u32::from(chunk.first().copied().unwrap_or(0));
-        let b1 = u32::from(chunk.get(1).copied().unwrap_or(0));
-        let b2 = u32::from(chunk.get(2).copied().unwrap_or(0));
-        let n = (b0 << 16) | (b1 << 8) | b2;
-        let ch = |i: u32| T.get(((n >> i) & 63) as usize).copied().map(char::from).unwrap_or('A');
-        out.push(ch(18));
-        out.push(ch(12));
-        out.push(if chunk.len() > 1 { ch(6) } else { '=' });
-        out.push(if chunk.len() > 2 { ch(0) } else { '=' });
-    }
-    out
-}
+pub use craft_mime::transfer::base64;
 
 /// Decode base64, ignoring whitespace; `None` on invalid characters.
 pub fn base64_decode(text: &str) -> Option<Vec<u8>> {
@@ -365,6 +350,20 @@ mod tests {
         assert_eq!(j["Flag"], true);
         assert_eq!(j["Pi"], 3.5);
         assert_eq!(j["When"]["$date"], "2001-01-02T00:00:00Z");
+    }
+
+    #[test]
+    fn base64_standard_padding_and_unwrapped_binary() {
+        for (raw, encoded) in [("", ""), ("f", "Zg=="), ("fo", "Zm8="), ("foo", "Zm9v"), ("foob", "Zm9vYg=="), ("fooba", "Zm9vYmE="), ("foobar", "Zm9vYmFy")] {
+            assert_eq!(base64(raw.as_bytes()), encoded);
+        }
+        assert_eq!(base64(&[0xfb, 0xff, 0xff]), "+///");
+        let bytes: Vec<u8> = (0..=255).collect();
+        let encoded = base64(&bytes);
+        assert_eq!(encoded.len(), 344);
+        assert!(!encoded.contains(['\r', '\n']));
+        assert_eq!(base64_decode(&encoded).unwrap(), bytes);
+        assert!(base64_decode("Zm!9v").is_none());
     }
 
     #[test]

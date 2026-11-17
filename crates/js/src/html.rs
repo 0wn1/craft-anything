@@ -20,6 +20,7 @@ pub struct HtmlScript {
 pub struct HtmlFacts {
     pub scripts: Vec<HtmlScript>,
     pub preloads: Vec<String>,
+    /// Nonempty meta policies in document order, separated by a comma and space.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub csp: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -206,8 +207,14 @@ pub fn scan_html(src: &str) -> HtmlFacts {
             }
             "meta" => {
                 let Some((attrs, end)) = attributes(src, &lower, after) else { break };
-                if get(&attrs, "http-equiv").is_some_and(|h| h.eq_ignore_ascii_case("content-security-policy")) {
-                    out.csp = get(&attrs, "content").map(String::from);
+                if get(&attrs, "http-equiv").is_some_and(|h| h.eq_ignore_ascii_case("content-security-policy"))
+                    && let Some(policy) = get(&attrs, "content").filter(|s| !s.trim_matches(|c: char| c.is_ascii_whitespace()).is_empty())
+                {
+                    let combined = out.csp.get_or_insert_with(String::new);
+                    if !combined.is_empty() {
+                        combined.push_str(", ");
+                    }
+                    combined.push_str(policy);
                 }
                 pos = end.max(at + 1);
             }
@@ -243,10 +250,11 @@ pub fn scan_html(src: &str) -> HtmlFacts {
 /// blocks such as JSON or HTML templates aren't JavaScript (#285).
 fn javascript_type(t: Option<&str>) -> bool {
     let Some(t) = t else { return true };
+    if t.is_empty() || t.eq_ignore_ascii_case("module") {
+        return true;
+    }
     let essence = t.trim_matches(|c: char| c.is_ascii_whitespace()).to_ascii_lowercase();
-    essence.is_empty()
-        || essence == "module"
-        || matches!(essence.as_str(), "text/babel" | "text/jsx" | "text/jscript" | "text/livescript")
+    matches!(essence.as_str(), "text/babel" | "text/jsx" | "text/jscript" | "text/livescript")
         || [
             "text/javascript",
             "text/javascript1.0",
