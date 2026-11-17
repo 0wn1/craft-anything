@@ -3111,6 +3111,9 @@ Owner: open · Status: in progress
       nothing about the rest (#1811; `web_page_show`'s outlines were fixed in #1845): count the kept
       bodies and say how many were left out and why.
       — claimed: htcom-code, branch bugfix/r3.13-body-outline-cap
+- [ ] A page that opens an `alert` on load makes `web_site_open` time out (#2010): answer the
+      page's JavaScript dialogs (accept `alert`/`beforeunload`, dismiss `confirm`/`prompt`) and say
+      which ones it opened. — claimed: htcom-code, branch bugfix/r3.13-js-dialog-blocks-open
 
 ---
 
