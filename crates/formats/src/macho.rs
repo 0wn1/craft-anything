@@ -237,7 +237,7 @@ pub fn enrich(data: &[u8], b: &mut Binary) {
             if o < minimum || o >= size {
                 return None;
             }
-            r.cstr(pos + o, size - o)
+            Some(std::ffi::CStr::from_bytes_until_nul(r.slice(pos + o, size - o)?).ok()?.to_string_lossy().into_owned())
         };
         match cmd {
             0x19 | 0x1 => {
