@@ -1749,9 +1749,12 @@ fn extract_type(rest: &str) -> String {
     let cleaned = strip_comments(rest);
     let trimmed = cleaned.trim_start();
     if trimmed.starts_with('[') {
-        // SQLite removes the outside bytes of the full bracket-led type, including any suffix.
+        // SQLite dequotes the full span only when its interior contains no quotation marks.
         let spelling = declared_type_spelling(rest);
         let inner = spelling.as_bytes().get(1..spelling.len().saturating_sub(1)).unwrap_or(&[]);
+        if inner.iter().any(|&byte| matches!(byte, b'\'' | b'"' | b'`' | b'[')) {
+            return take_identifier(trimmed).0;
+        }
         return String::from_utf8_lossy(inner).into_owned();
     }
     if trimmed.starts_with(['"', '`', '\'']) {

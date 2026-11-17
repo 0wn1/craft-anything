@@ -90,3 +90,15 @@ fn reads_the_full_span_for_bracketed_types_with_suffixes() {
     assert_eq!(columns[0].type_name, "INTEGER] EXTR");
     assert_eq!(columns[1].type_name, "NUMERIC](10, 2");
 }
+
+/// A quote inside the bracket-led type span leaves the first token's REAL affinity intact.
+#[test]
+fn keeps_real_affinity_when_a_bracketed_type_contains_another_quote() {
+    for declaration in [r#"[REAL] "INT""#, "[REAL] 'INT'", "[REAL] `INT`", "[REAL] [INT]", r#"[REAL] /* " */ INT"#] {
+        let sql = format!("CREATE TABLE t(amount {declaration})");
+        let bytes = table_db(&sql, &[(1, vec![Val::Int(1)])]);
+        let db = SqliteDb::parse(&bytes).unwrap();
+        assert_eq!(db.find_object("t").unwrap().columns[0].type_name, "REAL", "{declaration}");
+        assert_eq!(db.read_rows(2, 0, 1).rows[0].values, [CellValue::Real(1.0)], "{declaration}");
+    }
+}
