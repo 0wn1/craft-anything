@@ -2288,6 +2288,8 @@ Owner: open · Status: in progress
       The [unchanged-code baseline](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226895582) reproduces the new regression cases.
 - [x] Recognize ZIP directories from DOS directory attributes and Unix file-type metadata when the entry name has no trailing slash.
       — claimed: Afloat16, branch bugfix/r3.12-zip-directory-attributes
+- [x] Recognize legacy Zstandard ZIP method 20 in archive reading and firmware discovery.
+      — claimed: Plastic-time, branch bugfix/r3.12-zip-legacy-zstd
 - [x] Read ZIP bzip2 and XZ members through the existing bounded pure-Rust decompressors.
       — claimed: Afloat16, branch feature/r3.12-zip-bzip2-xz-20261109
       Source [`4cac3638`](https://github.com/Afloat16/craft-anything/commit/4cac36386e426e332bd89cb2cfa63894f3a367a5) passed [formats tests, fmt and clippy](https://github.com/Afloat16/claude-mem/actions/runs/42636776430/job/129226892219)
@@ -2760,6 +2762,8 @@ Owner: open · Status: in progress
       — claimed: Plastic-time, branch bugfix/r3.12-sourcemap-annotation-spacing-1111
 - [x] Keep source map annotation URL suffixes intact.
       — claimed: Plastic-time, branch rrfz/bugfix-r3.12-annotation-20261110
+- [x] Require the exact module keyword in HTML script inventories while retaining whitespace trimming for classic MIME types.
+      — claimed: Plastic-time, branch bugfix/r3.12-html-exact-module-keyword
 - [x] Match HTML script types against complete JavaScript MIME names and the exact module keyword.
       — claimed: Plastic-time, branch bugfix/r3.12-html-types-1116
 - [x] The JavaScript crate's `sourceMappingURL` reader is the formats reader, so the standard
@@ -3085,6 +3089,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.13-har-transfer-size
 - [x] Read HAR captures with the permitted UTF-8 byte order mark.
       — claimed: Afloat16, branch bugfix/r3.13-har-bom-bounds-20261107
+- [x] Retain multiple HTML meta Content-Security-Policy values in page evidence.
+      — claimed: Plastic-time, branch bugfix/r3.13-html-meta-csp-list
 - [x] Require complete HTML start tags before recording scripts, preloads and page metadata.
       — claimed: Plastic-time, branch bugfix/r3.13-html-incomplete-tags
 - [x] Resume scanning after an HTML comment that a browser closes with `--!>` or an abrupt empty end.
