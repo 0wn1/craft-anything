@@ -3152,6 +3152,7 @@ Owner: open · Status: in progress
 - [ ] `web_page_js_analyze` and `web_page_watch` still attach to a page without answering its
       dialogs, as do `web_mcp_tools_list` and `web_page_screenshot_take`: a page that opens one
       mid-run can still stall them.
+      — claimed: AlexJoaquimPereira, branch bugfix/r3.13-remaining-page-dialogs
 
 ---
 
