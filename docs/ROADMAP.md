@@ -3157,9 +3157,13 @@ Owner: open · Status: in progress
       and list each one with its answer in the result and summary; fake-CDP regressions cover
       `web_page_show`, a walkthrough, coverage measurement, listeners and the module graph.
       — claimed: AlexJoaquimPereira, branch bugfix/r3.13-page-tools-dialogs
-- [ ] `web_page_js_analyze` and `web_page_watch` still attach to a page without answering its
+- [x] `web_page_js_analyze` and `web_page_watch` still attach to a page without answering its
       dialogs, as do `web_mcp_tools_list` and `web_page_screenshot_take`: a page that opens one
-      mid-run can still stall them.
+      mid-run can still stall them. Done: all four use the answering connect, which enables Page
+      so Page.javascriptDialogOpening arrives; each result and summary lists the dialogs, with
+      declared secrets redacted where the tool has hidden values. Fake-CDP regressions cover all
+      four
+      — claimed: AlexJoaquimPereira, branch bugfix/r3.13-remaining-page-dialogs
 
 ---
 
