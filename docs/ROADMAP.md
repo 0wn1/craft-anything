@@ -2228,7 +2228,7 @@ Owner: open · Status: in progress
       — tests cover a UTF-8 character, a UTF-16 surrogate pair and a UTF-16 continuation-like
       byte at the cut; invalid bytes keep their lossy prefix. Claimed: AlexJoaquimPereira,
       branch bugfix/r3.12-sqlite-text-cap
-- [ ] Read parenthesized column names in SQLite WITHOUT ROWID primary keys.
+- [x] Read parenthesized column names in SQLite WITHOUT ROWID primary keys.
       — claimed: Plastic-time, branch bugfix/r3.12-sqlite-parenthesized-primary-key
 - [x] Count SQLite WITHOUT ROWID primary-key fields by column and effective collation.
       — claimed: Plastic-time, branch bugfix/r3.12-sqlite-key-collations
