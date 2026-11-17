@@ -815,9 +815,17 @@ pub fn find_source_mapping_url(js: &str) -> Option<String> {
             (rest, None)
         };
         let t = line.trim();
-        for prefix in ["//#", "//@", "/*#"] {
+        for prefix in ["//#", "//@", "/*#", "/*@"] {
             if let Some(rest) = t.strip_prefix(prefix).and_then(|comment| comment.trim_start().strip_prefix("sourceMappingURL=")) {
-                let url = if prefix.starts_with("/*") { rest.strip_suffix("*/").unwrap_or(rest).trim() } else { rest.trim() };
+                let url = if prefix.starts_with("/*") {
+                    let Some((inside, after)) = rest.split_once("*/") else { continue };
+                    if !after.trim().is_empty() {
+                        continue;
+                    }
+                    inside.trim()
+                } else {
+                    rest.trim()
+                };
                 if !url.is_empty() && !url.chars().any(char::is_whitespace) {
                     return Some(url.to_string());
                 }
