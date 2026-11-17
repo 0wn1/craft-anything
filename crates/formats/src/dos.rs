@@ -107,7 +107,7 @@ pub fn parse_mz(data: &[u8]) -> Result<MzImage, FormatError> {
         relocations.push(MzRelocation { offset: off, segment: seg, linear, in_module });
     }
     let lfanew = r.u32_le(0x3c).unwrap_or(0) as usize;
-    let extended_header = if lfarlc >= 0x40 && lfanew >= 0x40 {
+    let extended_header = if lfarlc >= 0x40 {
         r.slice(lfanew, 2).and_then(|sig| match sig {
             b"NE" => Some("NE (16-bit Windows)".to_string()),
             b"LE" | b"LX" => Some("LE/LX (OS/2 or VxD)".to_string()),

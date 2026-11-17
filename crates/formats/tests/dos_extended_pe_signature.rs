@@ -20,13 +20,17 @@ fn rejects_partial_and_mismatched_pe_signatures() {
     }
 }
 
-/// A newer header cannot begin inside the standard DOS header.
+/// Small executables can store a complete PE signature inside their DOS header.
 #[test]
-fn rejects_a_signature_inside_the_dos_header() {
-    let mut stub = with_extension(b"PE\0\0");
-    stub[0x30..0x34].copy_from_slice(b"PE\0\0");
-    stub[0x3c..0x40].copy_from_slice(&0x30_u32.to_le_bytes());
-    assert!(parse_mz(&stub).unwrap().extended_header.is_none());
+fn recognizes_a_complete_signature_inside_the_dos_header() {
+    for offset in [4_u32, 0x0c, 0x30] {
+        let mut stub = with_extension(b"");
+        let signature = offset as usize;
+        stub[signature..signature + 4].copy_from_slice(b"PE\0\0");
+        stub[0x3c..0x40].copy_from_slice(&offset.to_le_bytes());
+        assert!(craft_anything_formats::pe::has_pe_header(&stub));
+        assert_eq!(parse_mz(&stub).unwrap().extended_header.as_deref(), Some("PE (32/64-bit Windows)"), "offset {offset:#x}");
+    }
 }
 
 /// Signatures for the four supported extensions keep their current labels.
