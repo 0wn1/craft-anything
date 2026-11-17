@@ -1971,6 +1971,11 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch feature/r3.9-rgb9e5-textures-20261110
 - [ ] Unreal 5 and Oodle: IoStore packages, unversioned properties and Oodle-compressed paks
 - [ ] Game files: save pictures from IoStore containers (needs the Unreal 5 support above)
+- [ ] A look at one game's folder or archive can land after the person picked another one, so the
+      old profile, archive list or file rows are shown under the new pick and a save can name an
+      item from the old game. Carry the button job's request and ignore a result for a folder or
+      archive no longer shown
+      — claimed: AlexJoaquimPereira, branch bugfix/r3.9-game-files-stale-results
 - [x] Decode Unreal packed 10-bit normalized and 11-bit floating-point textures through the bounded picture exporter.
       — claimed: Afloat16, branch feature/r3.9-unreal-packed-textures-20261111
 - [x] Unreal: decode cooked half- and full-precision floating-point textures with the shared bounded pixel reader.
