@@ -2897,6 +2897,8 @@ Owner: open · Status: in progress
       — claimed: Plastic-time, branch bugfix/r3.12-plist-shared-array-values
 - [x] Bound NIB object copies by their retained data, key and class bytes so shared value ranges cannot amplify a small archive beyond the byte budget.
       — claimed: Afloat16, branch bugfix/r3.12-nib-retained-bytes-20261110
+- [ ] Use the complete SQLite type spelling to decide whether a quoted primary key aliases the rowid.
+      — claimed: Plastic-time, branch bugfix/r3.12-sqlite-type-boundaries
 - [x] Read a quoted SQLite column type as its type name, including an INTEGER rowid alias.
       — claimed: Plastic-time, branch bugfix/r3.12-sqlite-quoted-types
 - [x] Separate SQLite column names from their types at carriage returns and form feeds.
