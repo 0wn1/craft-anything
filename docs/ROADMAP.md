@@ -3085,6 +3085,8 @@ Owner: open · Status: in progress
       — claimed: Afloat16, branch bugfix/r3.13-har-transfer-size
 - [x] Read HAR captures with the permitted UTF-8 byte order mark.
       — claimed: Afloat16, branch bugfix/r3.13-har-bom-bounds-20261107
+- [x] Retain multiple HTML meta Content-Security-Policy values in page evidence.
+      — claimed: Plastic-time, branch bugfix/r3.13-html-meta-csp-list
 - [x] Require complete HTML start tags before recording scripts, preloads and page metadata.
       — claimed: Plastic-time, branch bugfix/r3.13-html-incomplete-tags
 - [x] Resume scanning after an HTML comment that a browser closes with `--!>` or an abrupt empty end.
