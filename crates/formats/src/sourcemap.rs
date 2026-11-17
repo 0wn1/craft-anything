@@ -803,7 +803,17 @@ fn past_sources(m: &str, sources: usize) -> Option<usize> {
 
 /// Find the `sourceMappingURL` comment near the end of a script.
 pub fn find_source_mapping_url(js: &str) -> Option<String> {
-    for line in js.lines().rev().take(64) {
+    let terminators = ['\n', '\r', '\u{2028}', '\u{2029}'];
+    // Ignore one trailing terminator, and count CRLF as a single line break.
+    let mut rest = js.strip_suffix("\r\n").or_else(|| js.strip_suffix(terminators)).unwrap_or(js);
+    for _ in 0..64 {
+        let (line, preceding) = if let Some((i, separator)) = rest.rmatch_indices(terminators).next() {
+            let before = rest.get(..i)?;
+            let before = if separator == "\n" { before.strip_suffix('\r').unwrap_or(before) } else { before };
+            (rest.get(i + separator.len()..)?, Some(before))
+        } else {
+            (rest, None)
+        };
         let t = line.trim();
         for prefix in ["//#", "//@", "/*#"] {
             if let Some(rest) = t.strip_prefix(prefix).and_then(|comment| comment.trim_start().strip_prefix("sourceMappingURL=")) {
@@ -813,6 +823,8 @@ pub fn find_source_mapping_url(js: &str) -> Option<String> {
                 }
             }
         }
+        let Some(preceding) = preceding else { break };
+        rest = preceding;
     }
     None
 }
