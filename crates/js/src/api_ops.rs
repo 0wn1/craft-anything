@@ -208,7 +208,12 @@ fn skip_string(chars: &mut std::iter::Peekable<std::str::CharIndices<'_>>, text:
         chars.next();
         chars.next();
         let mut quotes = 0;
-        for (_, c) in chars.by_ref() {
+        while let Some((i, c)) = chars.next() {
+            if c == '\\' && text.get(i..).is_some_and(|rest| rest.starts_with("\\\"\"\"")) {
+                chars.nth(2);
+                quotes = 0;
+                continue;
+            }
             quotes = if c == '"' { quotes + 1 } else { 0 };
             if quotes == 3 {
                 return Some(());
