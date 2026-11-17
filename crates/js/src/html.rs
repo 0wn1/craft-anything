@@ -220,6 +220,12 @@ pub fn scan_html(src: &str) -> HtmlFacts {
             _ if let Some(comment) = rest.strip_prefix("!--") => {
                 pos = at + 4 + comment_end(comment);
             }
+            _ if (rest.starts_with('!') && !rest.starts_with("!doctype") && !rest.starts_with("![cdata["))
+                || rest.strip_prefix('/').and_then(|s| s.as_bytes().first()).is_some_and(|c| !c.is_ascii_alphabetic()) =>
+            {
+                // The bogus comment state ends at the first greater-than sign, even inside quotes.
+                pos = rest.find('>').map_or(lower.len(), |end| at + 2 + end);
+            }
             _ if rest.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
                 || rest.strip_prefix('/').and_then(|s| s.as_bytes().first()).is_some_and(u8::is_ascii_alphabetic) =>
             {
