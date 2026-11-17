@@ -136,6 +136,22 @@ fn closing_tag(lower: &str, from: usize, name: &str) -> Option<usize> {
     })
 }
 
+/// The end of a comment, measured from just after `<!--`.
+fn comment_end(rest: &str) -> usize {
+    if rest.starts_with('>') {
+        return 1;
+    }
+    if rest.starts_with("->") {
+        return 2;
+    }
+    rest.match_indices('>')
+        .find_map(|(i, _)| {
+            let before = rest.get(..i)?;
+            (before.ends_with("--") || before.ends_with("--!")).then_some(i + 1)
+        })
+        .unwrap_or(rest.len())
+}
+
 /// Scan an HTML document.
 pub fn scan_html(src: &str) -> HtmlFacts {
     let lower = src.to_ascii_lowercase();
@@ -201,8 +217,8 @@ pub fn scan_html(src: &str) -> HtmlFacts {
                 out.title = src.get(end..close).map(|t| decode_entities(t).trim().chars().take(200).collect());
                 pos = close.max(at + 1);
             }
-            _ if rest.starts_with("!--") => {
-                pos = lower.get(at..).and_then(|r| r.find("-->")).map_or(lower.len(), |c| at + c + 3);
+            _ if let Some(comment) = rest.strip_prefix("!--") => {
+                pos = at + 4 + comment_end(comment);
             }
             _ if rest.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
                 || rest.strip_prefix('/').and_then(|s| s.as_bytes().first()).is_some_and(u8::is_ascii_alphabetic) =>
